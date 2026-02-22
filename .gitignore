@@ -1,0 +1,29 @@
+# Secrets
+.env
+bin/
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build and Distribution
+build/
+dist/
+*.spec
+installer_output/
+
+# App Data/Cache
+.translator_cache/
+session.json
+config.json
+
+# IDEs
+.vscode/
+.idea/

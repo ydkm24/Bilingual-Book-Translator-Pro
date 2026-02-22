@@ -1,5 +1,5 @@
 {
-    "version": "1.0.2",
+    "version": "1.0.3",
     "url": "https://github.com/ydkm24/Bilingual-Book-Translator-Pro/releases/latest",
     "release_notes": "Added support for portable Tesseract and AppData configuration migration.",
     "force_update": true

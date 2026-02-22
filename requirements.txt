@@ -1,0 +1,13 @@
+customtkinter
+pytesseract
+Pillow
+deep-translator
+pymupdf
+opencv-python
+numpy
+reportlab
+supabase
+python-dotenv
+requests
+deepl
+openai
