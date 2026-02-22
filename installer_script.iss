@@ -4,7 +4,7 @@
 [Setup]
 AppId={{D3B3A6E0-B7AB-4E81-81D3-F05D87F58E15}}
 AppName=Bilingual Book Translator Pro
-AppVersion=1.0.0
+AppVersion=1.0.4
 DefaultDirName={localappdata}\BilingualBookTranslatorPro
 DefaultGroupName=Bilingual Book Translator Pro
 OutputDir=installer_output

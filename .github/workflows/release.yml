@@ -29,16 +29,3 @@ jobs:
         run: |
           python -m PyInstaller --noconfirm pdf_translator.spec
 
-      - name: Zip Distribution
-        shell: pwsh
-        run: |
-          Compress-Archive -Path dist/BilingualBookTranslatorPro -DestinationPath BilingualBookTranslatorPro.zip
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: BilingualBookTranslatorPro.zip
-          body_path: manifest.json # Or a dedicated changelog
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

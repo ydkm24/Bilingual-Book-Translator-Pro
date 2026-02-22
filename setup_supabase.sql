@@ -35,13 +35,61 @@ CREATE TABLE IF NOT EXISTS pages (
     UNIQUE(book_id, page_index)
 );
 
--- 3. Enable RLS (Row Level Security) - Optional but recommended
--- For a prototype, you might want to allow all access if just testing:
+-- 3. Enable RLS (Row Level Security)
 ALTER TABLE books ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE permission_requests ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow all access" ON books FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all access" ON pages FOR ALL USING (true) WITH CHECK (true);
+-- ### BOOKS POLICIES ###
+
+-- Anyone can see public books OR their own private books
+CREATE POLICY "Select Books" ON books FOR SELECT 
+USING (is_public = true OR auth.uid() = owner_id);
+
+-- Only authenticated users can create books
+CREATE POLICY "Insert Books" ON books FOR INSERT 
+WITH CHECK (auth.uid() = owner_id);
+
+-- Only owners can update or delete their books
+CREATE POLICY "Update/Delete Books" ON books FOR ALL
+USING (auth.uid() = owner_id)
+WITH CHECK (auth.uid() = owner_id);
+
+-- ### PAGES POLICIES ###
+
+-- Access pages if the book itself is accessible
+CREATE POLICY "Select Pages" ON pages FOR SELECT 
+USING (EXISTS (SELECT 1 FROM books WHERE id = book_id AND (is_public = true OR auth.uid() = owner_id)));
+
+-- Only owners can insert/update pages (via book ownership)
+CREATE POLICY "Modify Pages" ON pages FOR ALL
+USING (EXISTS (SELECT 1 FROM books WHERE id = book_id AND auth.uid() = owner_id))
+WITH CHECK (EXISTS (SELECT 1 FROM books WHERE id = book_id AND auth.uid() = owner_id));
+
+-- ### PROFILES POLICIES ###
+
+-- Profiles are publically readable (for avatars/usernames)
+CREATE POLICY "View Profiles" ON profiles FOR SELECT USING (true);
+
+-- Users can only modify their own profile
+CREATE POLICY "Modify Own Profile" ON profiles FOR ALL 
+USING (auth.uid() = id) 
+WITH CHECK (auth.uid() = id);
+
+-- ### PERMISSION REQUESTS POLICIES ###
+
+-- Requesters can see their own requests, owners can see requests for their books
+CREATE POLICY "View Requests" ON permission_requests FOR SELECT
+USING (auth.uid() = requester_id OR EXISTS (SELECT 1 FROM books WHERE id = book_id AND owner_id = auth.uid()));
+
+-- Only authenticated users can create a request
+CREATE POLICY "Create Request" ON permission_requests FOR INSERT
+WITH CHECK (auth.uid() = requester_id);
+
+-- Only book owners can Approve/Deny (Update)
+CREATE POLICY "Moderate Requests" ON permission_requests FOR UPDATE
+USING (EXISTS (SELECT 1 FROM books WHERE id = book_id AND owner_id = auth.uid()));
 
 -- 4. Create the 'profiles' table for Usernames (SPRINT 34)
 CREATE TABLE IF NOT EXISTS profiles (

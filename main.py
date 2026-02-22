@@ -30,7 +30,7 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 
 # --- SPRINT 37: GLOBAL CONFIG & PORTABILITY ---
-APP_VERSION = "1.0.3"
+APP_VERSION = "1.0.4"
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -73,6 +73,8 @@ PAPER_SHEET_BG = ("#FFFFFF", "#242424") # Surface color for pages
 BORDER_COLOR = ("#D4C4A8", "#333333") 
 CARD_BG = ("#E8D5B5", "#2D2D2D")
 FRAME_BG = ("#F5E6CC", "#1E1E1E")
+BTN_PRIMARY = ("#6200EE", "#BB86FC")
+BTN_PRIMARY_HOVER = ("#3700B3", "#9965f4")
 BTN_SECONDARY = ("#E0E0E0", "#333333")
 BTN_SECONDARY_HOVER = ("#d5c09e", "#444444")
 INPUT_BG = ("#FFFFFF", "#2D2D2D")
@@ -1203,7 +1205,7 @@ class PDFTranslatorApp(ctk.CTk):
         self.refresh_library()
 
     def refresh_library(self):
-        """Fetches books from Supabase and populates the Library tab."""
+        """SPRINT 33/40: Fetches books from Supabase with account-based sync and permission checks."""
         if not self.supabase: return
 
         # Clear existing
@@ -1213,123 +1215,98 @@ class PDFTranslatorApp(ctk.CTk):
         search_term = self.lib_search_var.get().lower()
 
         try:
-            res = self.supabase.table("books").select("*").order("created_at", desc=True).execute()
-            books = res.data
+            # Query Logic
+            show_mode = self.lib_filter_var.get() if hasattr(self, "lib_filter_var") else "Public Library"
             
+            if show_mode == "My Books" and getattr(self, "current_user", None):
+                # ACCOUNT SYNC: Pull everything owned by THIS account
+                res = self.supabase.table("books").select("*").eq("owner_id", self.current_user["id"]).order("created_at", desc=True).execute()
+            else:
+                # PUBLIC LIBRARY: Pull everything marked public
+                res = self.supabase.table("books").select("*").eq("is_public", True).order("created_at", desc=True).execute()
+            
+            books = res.data
             if not books:
-                ctk.CTkLabel(self.lib_scroll, text="No books found in the cloud.").pack(pady=40)
+                ctk.CTkLabel(self.lib_scroll, text="No books found in this view.").pack(pady=40)
                 return
                 
             local_cache_dir = get_app_path(".translator_cache")
             local_caches = set(os.listdir(local_cache_dir)) if os.path.exists(local_cache_dir) else set()
-            show_mode = getattr(self, "lib_filter_var", ctk.StringVar(value="Public Library")).get()
-
-            # Fetch Avatars efficiently
-            owner_ids = list(set([b['owner_id'] for b in books if b.get('owner_id')]))
-            avatar_map = {}
-            if owner_ids:
-                try:
-                    prof_res = self.supabase.table("profiles").select("id, avatar_url").in_("id", owner_ids).execute()
-                    for p in prof_res.data:
-                        if p.get('avatar_url'):
-                            avatar_map[p['id']] = p['avatar_url']
-                except Exception as e:
-                    print(f"Failed to fetch avatars: {e}")
 
             # Group by Category
             raw_folders: Dict[str, List[Any]] = {}
             for book in books:
-                # Filter by search
                 if search_term and search_term not in book['title'].lower() and search_term not in book.get('language', '').lower():
                     continue
-                    
-                if show_mode == "My Books":
-                    _title = str(book.get('title', '')).replace('.pdf', '')
-                    if _title not in local_caches:
-                        continue
-                else: # Public Library
-                    if not book.get('is_public'):
-                        continue
-
+                
                 cat_key = str(book.get('category', 'Uncategorized') or 'Uncategorized')
-                if cat_key not in raw_folders:
-                    raw_folders[cat_key] = []
-                # append
+                if cat_key not in raw_folders: raw_folders[cat_key] = []
                 raw_folders[cat_key].append(book)
 
             folders = cast(Dict[str, List[Any]], raw_folders)
-
             if not folders:
                 ctk.CTkLabel(self.lib_scroll, text="No matches found.").pack(pady=40)
                 return
 
-            # Render Folders
+            # Render Folders (Explorer Style Grid)
             for category in sorted(folders.keys()):
                 cat_frame = ctk.CTkFrame(self.lib_scroll, fg_color=FRAME_BG, corner_radius=10)
                 cat_frame.pack(pady=10, fill="x", padx=10)
 
-                cat_header = ctk.CTkLabel(cat_frame, text=f"📂 {category} ({len(folders[category])})", 
+                cat_header = ctk.CTkLabel(cat_frame, text=f"📂 {category}", 
                                           font=("Inter", 16, "bold"), text_color=("#6200EE", "#BB86FC"), anchor="w")
                 cat_header.pack(fill="x", padx=15, pady=10)
 
-                # Grid for books in this category
                 book_grid = ctk.CTkFrame(cat_frame, fg_color="transparent")
                 book_grid.pack(fill="x", padx=10, pady=(0, 10))
 
                 for i, book in enumerate(folders[category]):
-                    if not isinstance(book, dict): continue
-                    # Simplified Book "Card"
-                    card = ctk.CTkFrame(book_grid, fg_color=CARD_BG, width=250, height=100)
+                    card = ctk.CTkFrame(book_grid, fg_color=CARD_BG, width=280, height=120)
                     card.grid(row=i // 3, column=i % 3, padx=10, pady=10, sticky="nsew")
                     book_grid.grid_columnconfigure(i % 3, weight=1)
 
+                    is_owner = self.current_user and book.get('owner_id') == self.current_user['id']
                     is_locked = book.get('is_read_only', True)
-                    status_icon = "🔒" if is_locked else "✎"
+                    
+                    # Icons
+                    status_icon = "👤" if is_owner else "🔓" if not is_locked else "🔒"
 
-                    # Title and Info
+                    # Info
                     info_frame = ctk.CTkFrame(card, fg_color="transparent")
-                    info_frame.pack(side="left", fill="both", expand=True, padx=10, pady=5)
+                    info_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
 
-                    title_label = ctk.CTkLabel(info_frame, text=book['title'], font=("Inter", 13, "bold"), 
-                                               anchor="w", wraplength=180)
-                    title_label.pack(fill="x")
-
+                    ctk.CTkLabel(info_frame, text=book['title'], font=("Inter", 13, "bold"), anchor="w", wraplength=180).pack(fill="x")
+                    
                     uploader = book.get('owner_username') or "Anonymous"
-                    pages = book.get('total_pages') or "?"
-                    
-                    sub_text = f"{book['language']} • {pages} Pages\n{status_icon} {'ReadOnly' if is_locked else 'Editable'}"
-                    lang_label = ctk.CTkLabel(info_frame, text=sub_text, font=("Inter", 11), 
-                                              text_color=TEXT_DIM, anchor="w", justify="left")
-                    lang_label.pack(fill="x", pady=(0, 5))
+                    sub_text = f"{book['language']} • {book.get('total_pages','?')} Pgs\nBy: {uploader}"
+                    ctk.CTkLabel(info_frame, text=sub_text, font=("Inter", 11), text_color=TEXT_DIM, anchor="w", justify="left").pack(fill="x")
 
-                    avatar_frame = ctk.CTkFrame(info_frame, fg_color="transparent")
-                    avatar_frame.pack(fill="x", pady=(0, 5))
-                    
-                    avatar_img = None
-                    owner_id = book.get('owner_id')
-                    if owner_id and owner_id in avatar_map:
-                        avatar_img = self.get_cached_avatar(owner_id, avatar_map[owner_id])
-                        
-                    if avatar_img:
-                        ctk.CTkLabel(avatar_frame, text="", image=avatar_img).pack(side="left", padx=(0, 8))
+                    # Actions Frame
+                    act_frame = ctk.CTkFrame(card, fg_color="transparent")
+                    act_frame.pack(side="right", padx=10)
+
+                    # 1. READ/EDIT Button
+                    if not is_locked or is_owner:
+                        btn_txt = "Edit" if not is_locked or is_owner else "Read"
+                        ctk.CTkButton(act_frame, text=btn_txt, width=70, height=28,
+                                      fg_color=BTN_PRIMARY, hover_color=BTN_PRIMARY_HOVER,
+                                      command=lambda b=book: self.load_book_from_cloud(b)).pack(pady=2)
                     else:
-                        ctk.CTkLabel(avatar_frame, text="👤", font=("Inter", 14), text_color=TEXT_DIM).pack(side="left", padx=(0, 8))
+                        # 2. REQUEST ACCESS Button (Collaborative Workflow)
+                        ctk.CTkButton(act_frame, text="Request Edit", width=70, height=28,
+                                      fg_color=BTN_WARNING, hover_color=BTN_WARNING_HOVER, text_color="#121212",
+                                      command=lambda b=book: self.request_edit_access(b['id'], b['title'], b['owner_id'])).pack(pady=2)
                         
-                    ctk.CTkLabel(avatar_frame, text=f"{uploader}", font=("Inter", 11, "bold"), text_color=TEXT_COLOR).pack(side="left")
+                        ctk.CTkButton(act_frame, text="Read Only", width=70, height=28,
+                                      fg_color=BTN_SECONDARY, hover_color=BTN_SECONDARY_HOVER, text_color=TEXT_COLOR,
+                                      command=lambda b=book: self.load_book_from_cloud(b)).pack(pady=2)
 
-                    # Open/Edit Button
-                    btn_text = "Read" if is_locked else "Edit"
-                    action_btn = ctk.CTkButton(card, text=btn_text, width=60, height=30,
-                                               fg_color=BTN_SECONDARY, hover_color=BTN_SECONDARY_HOVER, text_color=TEXT_COLOR,
-                                               command=lambda b=book: self.load_book_from_cloud(b))
-                    action_btn.pack(side="right", padx=10)
-                    
-                    # SPRINT 34: Admin Delete Button
-                    if getattr(self, "is_admin", False):
-                        del_btn = ctk.CTkButton(card, text="🗑", width=30, height=30,
-                                                fg_color=BTN_DANGER, hover_color=BTN_DANGER_HOVER, text_color="#FFFFFF",
-                                                command=lambda b=book['id']: self.delete_cloud_book(b, self))
-                        del_btn.pack(side="right", padx=(0, 5))
+                    if getattr(self, "is_admin", False) or is_owner:
+                        ctk.CTkButton(act_frame, text="🗑", width=30, height=28, fg_color=BTN_DANGER, 
+                                      command=lambda b=book['id']: self.delete_cloud_book(b, self)).pack(pady=2)
+
+        except Exception as e:
+            ctk.CTkLabel(self.lib_scroll, text=f"Connection Error: {e}", text_color="#E74C3C").pack(pady=40)
 
         except Exception as e:
             ctk.CTkLabel(self.lib_scroll, text=f"Error connecting to Cloud: {e}", text_color="#E74C3C").pack(pady=40)
@@ -1523,78 +1500,130 @@ class PDFTranslatorApp(ctk.CTk):
         self.qt_btn.configure(state="normal", text="Translate Now")
 
     def publish_to_gallery(self):
-        """SPRINT 33: Opens the Publish Manager to configure title, folder, and permissions."""
+        """SPRINT 33/40: Opens the Explorer-style Publish Manager."""
         if not self.supabase or not self.current_pdf_path: return
         
         # 1. Create Popup Window
         pub_win = ctk.CTkToplevel(self)
         pub_win.title("Publish Manager")
-        pub_win.geometry("400x450")
-        pub_win.grab_set() # Make modal
+        pub_win.geometry("450x550")
+        pub_win.grab_set() 
         
-        ctk.CTkLabel(pub_win, text="Publish to Cloud Library", font=("Inter", 18, "bold")).pack(pady=(20, 10))
+        main_container = ctk.CTkFrame(pub_win, fg_color="transparent")
+        main_container.pack(fill="both", expand=True, padx=25, pady=25)
+
+        ctk.CTkLabel(main_container, text="Cloud Explorer", font=("Inter", 20, "bold")).pack(pady=(0, 20))
         
         # 2. Custom Title Input
-        ctk.CTkLabel(pub_win, text="Book Title:").pack(anchor="w", padx=20)
+        ctk.CTkLabel(main_container, text="Book Title:", font=("Inter", 12, "bold")).pack(anchor="w")
         title_var = ctk.StringVar(value=os.path.basename(self.current_pdf_path))
-        ctk.CTkEntry(pub_win, textvariable=title_var, width=360).pack(padx=20, pady=(0, 15))
+        ctk.CTkEntry(main_container, textvariable=title_var, width=400).pack(pady=(5, 15))
         
-        # 3. Folder/Category Selection
-        ctk.CTkLabel(pub_win, text="Select Folder:").pack(anchor="w", padx=20)
+        # 3. Folder/Category Selection (Explorer Style)
+        ctk.CTkLabel(main_container, text="Select Destination Folder:", font=("Inter", 12, "bold")).pack(anchor="w")
         
-        # Fetch existing folders
-        existing_folders = ["Uncategorized"]
-        try:
-            res = self.supabase.table("books").select("category").execute()
-            if res.data:
-                folders = set(b.get("category", "Uncategorized") for b in res.data if b.get("category"))
-                existing_folders = sorted(list(folders))
-        except Exception:
-            pass
+        folders_frame = ctk.CTkFrame(main_container, fg_color=FRAME_BG, height=150)
+        folders_frame.pack(fill="x", pady=(5, 5))
+        
+        folders_list = ctk.CTkScrollableFrame(folders_frame, height=120, fg_color="transparent")
+        folders_list.pack(fill="both", expand=True, padx=5, pady=5)
+
+        # State for folder selection
+        selected_folder = ctk.StringVar(value="Uncategorized")
+        folder_btns = {}
+
+        def _select_folder(name):
+            selected_folder.set(name)
+            for n, btn in folder_btns.items():
+                if n == name:
+                    btn.configure(fg_color=("#BB86FC", "#6200EE"), text_color="#121212")
+                else:
+                    btn.configure(fg_color="transparent", text_color=TEXT_COLOR)
+
+        def _refresh_folders():
+            for widget in folders_list.winfo_children(): widget.destroy()
             
-        folder_var = ctk.StringVar(value="Uncategorized")
-        folder_menu = ctk.CTkComboBox(pub_win, variable=folder_var, values=existing_folders, width=360)
-        folder_menu.pack(padx=20, pady=(0, 15))
-        ctk.CTkLabel(pub_win, text="*Type a new name to create a folder", text_color=TEXT_DIM, font=("Inter", 10)).pack(anchor="w", padx=20, pady=(0, 15))
+            try:
+                res = self.supabase.table("books").select("category").execute()
+                names = set(["Uncategorized"])
+                if res.data:
+                    for b in res.data:
+                        if b.get("category"): names.add(b["category"])
+                
+                for name in sorted(list(names)):
+                    btn = ctk.CTkButton(folders_list, text=f"📂 {name}", anchor="w", 
+                                        fg_color="transparent", text_color=TEXT_COLOR,
+                                        hover_color=("#BB86FC", "#6200EE"), height=30,
+                                        command=lambda n=name: _select_folder(n))
+                    btn.pack(fill="x", pady=2)
+                    folder_btns[name] = btn
+                
+                _select_folder(selected_folder.get())
+            except: pass
+
+        _refresh_folders()
+
+        # Add New Folder Row
+        new_folder_row = ctk.CTkFrame(main_container, fg_color="transparent")
+        new_folder_row.pack(fill="x", pady=(0, 15))
         
-        # 4. Permissions Toggle
-        ctk.CTkLabel(pub_win, text="Permissions (Collaborative Editing):").pack(anchor="w", padx=20)
+        new_f_entry = ctk.CTkEntry(new_folder_row, placeholder_text="New folder name...", width=300)
+        new_f_entry.pack(side="left")
+
+        def _add_folder():
+            name = new_f_entry.get().strip()
+            if name:
+                selected_folder.set(name)
+                new_f_entry.delete(0, "end")
+                _refresh_folders()
+
+        add_btn = ctk.CTkButton(new_folder_row, text="+", width=40, font=("Inter", 16, "bold"),
+                                fg_color=BTN_SECONDARY, hover_color=BTN_SECONDARY_HOVER,
+                                command=_add_folder)
+        add_btn.pack(side="right", padx=(5, 0))
+
+        # 4. Privacy & Collaboration Toggles
+        ctk.CTkLabel(main_container, text="Cloud Settings:", font=("Inter", 12, "bold")).pack(anchor="w")
+        
+        settings_box = ctk.CTkFrame(main_container, fg_color=FRAME_BG)
+        settings_box.pack(fill="x", pady=(5, 20))
+
+        # Public Release Toggle
+        is_public_var = ctk.BooleanVar(value=False) # DEFAULT TO PRIVATE (Safe for Production)
+        public_switch = ctk.CTkSwitch(settings_box, text="Release to Public Library", variable=is_public_var,
+                                      progress_color=("#BB86FC", "#6200EE"))
+        public_switch.pack(anchor="w", padx=15, pady=10)
+        
+        # Read-Only Toggle
         read_only_var = ctk.BooleanVar(value=True)
-        read_only_switch = ctk.CTkSwitch(pub_win, text="Read-Only (Lock Edits)", variable=read_only_var)
-        read_only_switch.pack(anchor="w", padx=20, pady=(5, 20))
-        
+        read_only_switch = ctk.CTkSwitch(settings_box, text="Read-Only (Requires Edit Request)", variable=read_only_var)
+        read_only_switch.pack(anchor="w", padx=15, pady=(0, 10))
+
         # 5. Submit Action
         def _execute_publish():
             pub_title = title_var.get().strip() or (os.path.basename(self.current_pdf_path) if self.current_pdf_path else "Untitled")
-            pub_folder = folder_var.get().strip() or "Uncategorized"
+            pub_folder = selected_folder.get().strip() or "Uncategorized"
             is_read_only = read_only_var.get()
+            is_public = is_public_var.get()
             
-            pub_btn.configure(state="disabled", text="Uploading...")
+            pub_btn.configure(state="disabled", text="Syncing to Cloud...")
             
-            # Run in thread
             def _job():
-                book_id_or_err = self.sync_book_metadata(pub_title, pub_folder, is_read_only)
+                # Pass is_public to sync_book_metadata (need to update that method too)
+                book_id_or_err = self.sync_book_metadata(pub_title, pub_folder, is_read_only, is_public)
                 if not book_id_or_err or (isinstance(book_id_or_err, str) and book_id_or_err.startswith("Error:")):
                     err_hint = book_id_or_err if isinstance(book_id_or_err, str) else "Unknown"
-                    self.schedule_ui_update(lambda msg=err_hint: messagebox.showerror("Cloud Error", f"Failed to register book in cloud.\n\nReason: {msg}"))
-                    self.schedule_ui_update(lambda: pub_btn.configure(state="normal", text="Publish Now"))
+                    self.schedule_ui_update(lambda msg=err_hint: messagebox.showerror("Cloud Error", f"Sync failed.\n\nReason: {msg}"))
+                    self.schedule_ui_update(lambda: pub_btn.configure(state="normal", text="Sync Now"))
                     return
                 book_id = book_id_or_err
                     
                 try:
-                    # CRITICAL: Align cache_dir with book subfolder before uploading images
                     if self.current_pdf_path:
                         _book_name = os.path.basename(self.current_pdf_path).replace(".pdf", "")
                         self.cache_dir = get_app_path(os.path.join(".translator_cache", _book_name))
                     
-                    if os.path.exists(self.cache_dir):
-                        import glob
-                        found_imgs = glob.glob(os.path.join(self.cache_dir, "img_*.png"))
-                    
-                    # 1. First, upload all pages to the database
                     self.schedule_ui_update(lambda: pub_btn.configure(text="Uploading Pages..."))
-                    img_upload_count = int(0)
-                    img_skip_count = int(0)
                     for page_data in self.all_page_data:
                         if "page" not in page_data: continue
                         page_idx = page_data["page"]
@@ -1611,53 +1640,51 @@ class PDFTranslatorApp(ctk.CTk):
                             "is_rtl_page": page_data.get("is_rtl_page", False)
                         }, on_conflict="book_id,page_index").execute()
                         
-                        # 2. Upload images if they exist
                         dyn_img_path = os.path.join(self.cache_dir, f"img_{page_idx}.png")
                         if os.path.exists(dyn_img_path):
-                            cnt_val = int(img_upload_count)
-                            img_upload_count = cnt_val + 1
                             try:
                                 with open(dyn_img_path, "rb") as f:
                                     self.supabase.storage.from_("book-images").upload(
                                         f"{str(book_id)}/img_{int(page_idx)}.png",
-                                        f,
-                                        file_options={"content-type": "image/png", "upsert": "true"}
+                                        f, file_options={"content-type": "image/png", "upsert": "true"}
                                     )
-                            except Exception as img_e:
-                                print(f"Failed to upload image for page {page_idx}: {img_e}")
-                        else:
-                            skp_val = int(img_skip_count)
-                            img_skip_count = skp_val + 1
-                                
-                    # 3. Finally, mark it public
-                    self.supabase.table("books").update({"is_public": True}).eq("id", book_id).execute()
-                    
-                    self.schedule_ui_update(lambda: messagebox.showinfo("Published", f"Shared to the '{pub_folder}' folder!"))
-                    self.schedule_ui_update(lambda: self.status_label.configure(text="Book Published Successfully!"))
-                    self.schedule_ui_update(lambda: self.sync_btn.pack(side="right", padx=5, pady=10)) # Reveal Sync
+                            except Exception: pass
+
+                    self.schedule_ui_update(lambda: messagebox.showinfo("Success", f"Book synced to cloud folder '{pub_folder}'!"))
+                    self.schedule_ui_update(lambda: self.status_label.configure(text="Cloud Sync Complete"))
+                    self.schedule_ui_update(lambda: self.sync_btn.pack(side="right", padx=5, pady=10)) 
                     self.schedule_ui_update(lambda: self.sync_btn.configure(state="normal"))
-                    self.schedule_ui_update(lambda: self.publish_btn.pack_forget()) # Hide Publish
+                    self.schedule_ui_update(lambda: self.publish_btn.pack_forget())
                     self.schedule_ui_update(pub_win.destroy)
+                    self.schedule_ui_update(self.refresh_library) # Refresh list
                 except Exception as e:
-                    self.schedule_ui_update(lambda err=e: messagebox.showerror("Error", f"Failed to publish: {err}"))
-                    self.schedule_ui_update(lambda: pub_btn.configure(state="normal", text="Publish Now"))
+                    self.schedule_ui_update(lambda err=e: messagebox.showerror("Error", f"Failed: {err}"))
+                    self.schedule_ui_update(lambda: pub_btn.configure(state="normal", text="Sync Now"))
                     
             threading.Thread(target=_job, daemon=True).start()
             
-        pub_btn = ctk.CTkButton(pub_win, text="Publish Now", fg_color="#FF9800", hover_color="#F57C00", text_color="#121212", command=_execute_publish)
-        pub_btn.pack(pady=10)
+        pub_btn = ctk.CTkButton(main_container, text="Sync to Cloud", height=40, font=("Inter", 14, "bold"),
+                                fg_color=BTN_PRIMARY, hover_color=BTN_PRIMARY_HOVER, text_color="#FFFFFF", 
+                                command=_execute_publish)
+        pub_btn.pack(fill="x", pady=5)
 
     def force_cloud_sync(self):
-        """SPRINT 33: Manually pushes local JSON edits back to the cloud for collaborative books."""
-        if not self.supabase or not self.current_pdf_path: return
+        """Manually pushes local edits back to cloud."""
+        if not self.supabase or not self.all_page_data or not self.current_pdf_path: return
         
-        book_title = os.path.basename(self.current_pdf_path)
+        title = os.path.basename(self.current_pdf_path)
         self.sync_btn.configure(state="disabled", text="Syncing...")
         
         def _job():
             try:
+                # sync_book_metadata now requires title
+                book_id = self.sync_book_metadata(title)
+                if not book_id:
+                    self.schedule_ui_update(lambda: messagebox.showerror("Sync Failed", "Book not registered in cloud or sync failed."))
+                    return
+                
                 # 1. Check permissions
-                res = self.supabase.table("books").select("id, is_read_only").eq("title", book_title).execute()
+                res = self.supabase.table("books").select("id, is_read_only, owner_id").eq("id", book_id).execute()
                 if not res.data:
                     self.schedule_ui_update(lambda: messagebox.showerror("Sync Failed", "Book is not registered in the cloud."))
                     return
@@ -2127,7 +2154,7 @@ class PDFTranslatorApp(ctk.CTk):
                 # Set the app to a paused state so the user can click "Resume"
                 self.is_paused = True
                 self.stop_requested = True
-                self.schedule_ui_update(lambda: self.pause_btn.configure(state="normal", text="Resume", fg_color="#2E7D32", hover_color="#1B5E20", command=self.toggle_pause))
+                self.schedule_ui_update(lambda: self.pause_btn.configure(text="Resume", fg_color="#2E7D32", hover_color="#1B5E20", command=self.toggle_pause))
                 
                 # Automatically pull the original PDF path from the first page's metadata
                 if self.all_page_data and 'original_pdf_path' in self.all_page_data[0]:
@@ -2346,20 +2373,20 @@ class PDFTranslatorApp(ctk.CTk):
         import gc
         gc.collect()
 
-    def sync_book_metadata(self, custom_title=None, category="Uncategorized", is_read_only=True):
-        """SPRINT 33: Registers the book with custom titles, folders, and permissions."""
-        if not self.supabase or not self.current_pdf_path: return None
+    def sync_book_metadata(self, book_title, category="Uncategorized", is_read_only=True, is_public=False):
+        """Registers or updates book information in Supabase."""
+        if not self.supabase or not self.current_user:
+            return "Error: Not logged in"
         
-        book_title = custom_title if custom_title else os.path.basename(self.current_pdf_path)
         try:
-            # Check if already exists (by original title or custom)
-            res = self.supabase.table("books").select("id").eq("title", book_title).execute()
+            # Check for existing
+            res = self.supabase.table("books").select("id").eq("title", book_title).eq("owner_id", self.current_user["id"]).execute()
             if res.data:
-                # Update existing book's folder/permissions
-                book_id = res.data[0]['id']
+                book_id = res.data[0]["id"]
                 self.supabase.table("books").update({
                     "category": category,
-                    "is_read_only": is_read_only
+                    "is_read_only": is_read_only,
+                    "is_public": is_public
                 }).eq("id", book_id).execute()
                 return book_id
                 
@@ -2370,8 +2397,9 @@ class PDFTranslatorApp(ctk.CTk):
                 "language": self.lang_menu.get(),
                 "category": category,
                 "is_read_only": is_read_only,
-                "owner_id": self.current_user["id"] if self.current_user else None,
-                "owner_username": self.current_username if self.current_username else None
+                "is_public": is_public,
+                "owner_id": self.current_user["id"],
+                "owner_username": self.current_username
             }
             res = self.supabase.table("books").insert(new_book).execute()
             return res.data[0]['id']
