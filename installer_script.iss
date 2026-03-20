@@ -4,11 +4,11 @@
 [Setup]
 AppId={{D3B3A6E0-B7AB-4E81-81D3-F05D87F58E15}}
 AppName=Bilingual Book Translator Pro
-AppVersion=1.0.4
+AppVersion=1.5.0
 DefaultDirName={localappdata}\BilingualBookTranslatorPro
 DefaultGroupName=Bilingual Book Translator Pro
 OutputDir=installer_output
-OutputBaseFilename=BilingualBookTranslatorPro_Setup
+OutputBaseFilename=BilingualBookTranslatorPro_v150_Setup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
