@@ -667,6 +667,17 @@
                             <div class="setting-row"><span class="setting-name">Ollama (Local)</span><span class="setting-value disconnected">● Not Running</span></div>
                         </div>
                         <div class="settings-section">
+                            <div class="section-label">OCR ENGINE CONFIGURATION</div>
+                            <div class="setting-row">
+                                <span class="setting-name" title="Requires downloading specific language models to bin/tesseract">OCR Quality Tier</span>
+                                <select class="footer-select" id="settingsOcrTier">
+                                    <option value="Fast">Fast (Speed)</option>
+                                    <option value="Standard" selected>Standard (Default)</option>
+                                    <option value="Best">Best (Precision)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="settings-section">
                             <div class="section-label">APPEARANCE</div>
                             <div class="setting-row"><span class="setting-name">Theme</span><select class="footer-select"><option>Dark (Hacker Green)</option><option>Light</option></select></div>
                             <div class="setting-row"><span class="setting-name">Font Size</span><input type="range" class="setting-slider" min="10" max="20" value="13"></div>
@@ -1093,7 +1104,11 @@
 
         function switchTab(tabId, btn) {
             console.log("Switching to tab: " + tabId);
-            document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-page').forEach(p => {
+                p.classList.remove('active');
+                p.classList.remove('qt-modal-mode');
+                p.style.display = ''; // Clear any inline overrides
+            });
             document.querySelectorAll('.sidebar-icon').forEach(i => i.classList.remove('active'));
             
             const target = document.getElementById('tab-' + tabId);
@@ -2115,7 +2130,8 @@
                 const srcLang = document.getElementById('translatorSourceLang')?.value || 'Auto-Detect';
                 const tgtLang = document.getElementById('translatorTargetLang')?.value || 'English';
                 const engine = 'Google'; // Default engine for now
-                const res = await eel.start_translation(srcLang, tgtLang, engine)();
+                const ocrTier = document.getElementById('settingsOcrTier')?.value || 'Standard';
+                const res = await eel.start_translation(srcLang, tgtLang, engine, ocrTier)();
                 if (res.success) {
                     _translatorIsRunning = true;
                     if (btn) { btn.textContent = '⏸ PAUSE'; btn.classList.add('running'); }
@@ -2153,6 +2169,7 @@
             const srcLang = document.getElementById('translatorSourceLang')?.value || 'Auto-Detect';
             const tgtLang = document.getElementById('translatorTargetLang')?.value || 'English';
             const engine = 'Google'; // Default engine for now
+            const ocrTier = document.getElementById('settingsOcrTier')?.value || 'Standard';
             
             // Visual feedback on the rescan button
             const rescanBtn = document.getElementById('translator-rescan-btn');
@@ -2175,7 +2192,7 @@
             _translatorIsRunning = true;
             
             try {
-                const res = await eel.rescan_translator_page(_translatorCurrentPage, srcLang, tgtLang, engine)();
+                const res = await eel.rescan_translator_page(_translatorCurrentPage, srcLang, tgtLang, engine, ocrTier)();
                 if (!res.success) {
                     alert('Failed to start rescan: ' + res.error);
                     _translatorIsRunning = false;
@@ -2407,6 +2424,10 @@
                 _qtImageBase64 = evt.target.result;
                 document.getElementById('qtImageStatus').textContent = file.name;
                 document.getElementById('qtImageDropzone').style.borderColor = 'var(--accent-green)';
+                
+                // Show preview
+                const dropzone = document.getElementById('qtImageDropzone');
+                dropzone.innerHTML = `<img src="${_qtImageBase64}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px;">`;
             };
             reader.readAsDataURL(file);
         }
@@ -2763,11 +2784,6 @@
             const qtTab = document.getElementById('tab-quicktranslate');
             qtTab.classList.add('qt-modal-mode');
             
-            // Remove the active class from regular tabs to avoid CSS conflicts
-            document.querySelectorAll('.tab-page').forEach(tab => {
-                if(tab.id !== 'tab-quicktranslate') tab.classList.remove('active');
-            });
-            
             document.getElementById('contextMenu').style.display = 'none';
 
             if (isImage && imageSrc) {
@@ -2782,13 +2798,16 @@
                 document.getElementById('qtImageStatus').textContent = "Loaded from right-click";
                 document.getElementById('qtImageDropzone').style.borderColor = 'var(--accent-green)';
                 
-                setTimeout(executeQuickTranslate, 300);
+                // Show preview in dropzone
+                document.getElementById('qtImageDropzone').innerHTML = `<img src="${imageSrc}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px;">`;
+                
+                // We no longer auto-translate here; user must click TRANSLATE
             } else if (textToTranslate) {
                 setQTMode('text', document.getElementById('btn-qt-text'));
                 document.getElementById('qtTextInput').value = textToTranslate;
                 document.getElementById('qtTextCount').textContent = textToTranslate.length + ' chars';
                 
-                setTimeout(executeQuickTranslate, 300);
+                // We no longer auto-translate here; user must click TRANSLATE
             }
         }
 
@@ -2797,13 +2816,25 @@
             const qtTab = document.getElementById('tab-quicktranslate');
             qtTab.classList.remove('qt-modal-mode');
             
-            // If they were on translator before, ensure it shows again properly if switchTab was active
-            // Actually switchTab logic handles normal routing.
-            // If the modal was above the translator, we don't need to do anything, removing the class hides the modal.
-            // But since tab-quicktranslate might still have display:flex from being shown, we need to strip it if not active
-            const sidebarIcon = document.querySelector('.sidebar-icon[data-tab="quicktranslate"]');
-            if (sidebarIcon && !sidebarIcon.classList.contains('active')) {
-                qtTab.style.display = 'none';
+            // Clear inline display style so the CSS classes (.active vs hidden) can do their job properly
+            qtTab.style.display = '';
+
+            // Flush inputs so right-click contexts don't persist globally into the regular tab
+            _qtImageBase64 = null;
+            document.getElementById('qtTextInput').value = "";
+            document.getElementById('qtTextOutput').value = "";
+            document.getElementById('qtOcrOutput').value = "";
+            document.getElementById('qtImageTransOutput').value = "";
+            document.getElementById('qtTextCount').textContent = "0 chars";
+            
+            const dropzone = document.getElementById('qtImageDropzone');
+            if (dropzone) {
+                dropzone.style.borderColor = 'var(--border-green)';
+                dropzone.innerHTML = `
+                    <span class="qt-drop-icon">📷</span>
+                    <span id="qtImageStatus">Drop an image here or click to browse</span>
+                    <span class="qt-drop-hint">(Supports PNG, JPG, BMP)</span>
+                `;
             }
         }
 

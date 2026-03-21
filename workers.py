@@ -12,7 +12,7 @@ import re
 from utils import humanize_error, get_app_path
 
 
-def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translator_src, page_width, current_rtl, tesseract_path, fallback_mode=False):
+def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translator_src, page_width, current_rtl, tesseract_path, fallback_mode=False, ocr_tier="Standard", is_quick_mode=False):
     """Standalone worker for processing a single page in a separate process.
     Reads image directly from file and extracts layout blocks independently."""
     # We re-import inside the worker to ensure process-isolation safety
@@ -33,7 +33,15 @@ def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translato
     # The bundled Tesseract looks for .traineddata files directly inside TESSDATA_PREFIX,
     # it does NOT automatically append "/tessdata/". So we must point directly to it.
     tess_dir = os.path.dirname(tesseract_path)
-    tess_data_dir = os.path.join(tess_dir, "tessdata")
+    
+    tessdata_dir_map = {
+        "Fast": "tessdata_fast",
+        "Standard": "tessdata",
+        "Best": "tessdata_best"
+    }
+    tessdata_subdir = tessdata_dir_map.get(ocr_tier, "tessdata")
+    tess_data_dir = os.path.join(tess_dir, tessdata_subdir)
+    
     os.environ["TESSDATA_PREFIX"] = tess_data_dir
     
     # Simple log inside worker
@@ -109,28 +117,37 @@ def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translato
         return {"ocr": "+".join(list(dict.fromkeys(detected_ocr))), "trans": detected_trans, "rtl": is_rtl}
 
     try:
-        doc = fitz.open(file_path)
-        worker_log("PDF opened.")
-        page = doc.load_page(page_num)
-        worker_log("Page loaded.")
-        
-        # Extract blocks inside the worker to prevent main-thread hangs
-        blocks = list(page.get_text("blocks"))
-        
-        # SPRINT 81: High-Res OCR (288 DPI) for better Arabic/Asian detection
-        scale_val = 8 if fallback_mode else 4
-        pix = page.get_pixmap(matrix=fitz.Matrix(scale_val, scale_val))
-        worker_log("Pixmap generated.")
-        img_bytes = pix.tobytes("png")
-        img = Image.open(io.BytesIO(img_bytes))
-        worker_log("Image data ready.")
-        doc.close() # Release handle immediately
-        
-        # ... (Logic from pass 1 and pass 2, including preprocessing and translation)
-        # This is a full extraction of the page processing logic to be independent of self
-        # Preprocessing
-        cv_img = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
-        if cv_img is None: return {"page": page_num, "error": "Image decode failed"}
+        if is_quick_mode:
+            # SPRINT 102: Direct Image Loading for Quick Translate
+            worker_log(f"Quick Mode: Loading image directly from {file_path}")
+            img = Image.open(file_path)
+            cv_img = cv2.imread(file_path)
+            if cv_img is None: return {"page": page_num, "error": "Image decode failed"}
+            blocks = []
+        else:
+            # Standard PDF Page Loading
+            doc = fitz.open(file_path)
+            worker_log("PDF opened.")
+            page = doc.load_page(page_num)
+            worker_log("Page loaded.")
+            
+            # Extract blocks inside the worker to prevent main-thread hangs
+            blocks = list(page.get_text("blocks"))
+            
+            # SPRINT 81: High-Res OCR (288 DPI) for better Arabic/Asian detection
+            scale_val = 8 if fallback_mode else 4
+            pix = page.get_pixmap(matrix=fitz.Matrix(scale_val, scale_val))
+            worker_log("Pixmap generated.")
+            img_bytes = pix.tobytes("png")
+            img = Image.open(io.BytesIO(img_bytes))
+            worker_log("Image data ready.")
+            doc.close() # Release handle immediately
+            
+            # ... (Logic from pass 1 and pass 2, including preprocessing and translation)
+            # This is a full extraction of the page processing logic to be independent of self
+            # Preprocessing
+            cv_img = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
+            if cv_img is None: return {"page": page_num, "error": "Image decode failed"}
         
         # SPRINT 31: Advanced Preprocessing (Speckle Filter & Contrast for OCR Worker)
         # We use a fast version for the worker

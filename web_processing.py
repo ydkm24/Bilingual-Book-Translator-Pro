@@ -130,19 +130,21 @@ class WebTranslatorManager:
             # Generate/Update project_info.json
             info_path = os.path.join(self.cache_dir, "project_info.json")
             
-            # Determine correct resume page dynamically
-            first_untranslated = 0
-            for i in range(num_pages):
-                if not self.all_page_data[i] or not self.all_page_data[i].get("english") or "[Translation" in self.all_page_data[i].get("english", ""):
-                    first_untranslated = i
+            # Find highest completed/scanned page to resume at
+            resume_page = 0
+            for i in range(num_pages - 1, -1, -1):
+                if self.all_page_data[i] is not None:
+                    resume_page = i
                     break
-            self.current_page = first_untranslated
+            
+            # Start background translation from here if user clicks START
+            self.current_page = resume_page
 
             if not os.path.exists(info_path):
                 metadata = {
                     "book_name": book_name,
                     "total_pages": num_pages,
-                    "last_translated_page": first_untranslated,
+                    "last_translated_page": resume_page,
                     "source_lang": self.source_lang,
                     "target_lang": self.target_lang,
                     "last_accessed": time.time(),
@@ -156,7 +158,7 @@ class WebTranslatorManager:
                     with open(info_path, "r", encoding="utf-8") as f:
                         metadata = json.load(f)
                     metadata["last_accessed"] = time.time()
-                    metadata["last_translated_page"] = first_untranslated
+                    metadata["last_translated_page"] = resume_page
                     with open(info_path, "w", encoding="utf-8") as f:
                         json.dump(metadata, f, indent=4)
                 except:
@@ -177,6 +179,7 @@ class WebTranslatorManager:
                 "total_pages": num_pages,
                 "title": book_name,
                 "first_image": img_path.replace("\\", "/"),
+                "last_page": resume_page
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -240,7 +243,7 @@ class WebTranslatorManager:
 
 
 
-    def start_translation(self, source_lang="Auto-Detect", target_lang="English", engine="Google", pages_to_process=None):
+    def start_translation(self, source_lang="Auto-Detect", target_lang="English", engine="Google", pages_to_process=None, ocr_tier="Standard"):
         """Begins the OCR + Translation pipeline in a background thread."""
         if self.is_running:
             return {"success": False, "error": "Translation already running."}
@@ -250,6 +253,7 @@ class WebTranslatorManager:
         self.source_lang = source_lang
         self.target_lang = target_lang
         self.engine = engine
+        self.ocr_tier = ocr_tier
         self.stop_requested = False
         self.is_running = True
 
@@ -310,7 +314,7 @@ class WebTranslatorManager:
                     res = ocr_worker(
                         page_num, self.pdf_path, ocr_lang_code, is_auto,
                         LANGUAGES, translator_src, page_width, is_rtl, self.tesseract_path,
-                        fallback_mode=is_fallback
+                        fallback_mode=is_fallback, ocr_tier=self.ocr_tier
                     )
                 except Exception as e:
                     res = {"page": page_num, "error": str(e)}
@@ -531,11 +535,11 @@ class WebTranslatorManager:
             translator_src = lang_info["trans"]
             tgt_trans = target_info["trans"]
             
-            # Just pass arbitrary page num and width
+            # Using strictly positional arguments for the required parameters to avoid any mismatch
             ocr_res = ocr_worker(
                 0, temp_path, ocr_code, is_auto, LANGUAGES, 
-                translator_src, page_width=1000, 
-                is_quick_mode=True, tesseract_path=self.tesseract_path
+                translator_src, 1000, False, self.tesseract_path,
+                False, "Best", True
             )
             
             # Clean up

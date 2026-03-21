@@ -840,14 +840,14 @@ def trigger_pdf_upload():
     return result
 
 @eel.expose
-def start_translation(source_lang="Auto-Detect", target_lang="English", engine="Google"):
+def start_translation(source_lang="Auto-Detect", target_lang="English", engine="Google", ocr_tier="Standard"):
     """Starts the OCR + Translation pipeline."""
-    return translator.start_translation(source_lang, target_lang, engine)
+    return translator.start_translation(source_lang, target_lang, engine, ocr_tier=ocr_tier)
 
 @eel.expose
-def rescan_translator_page(page_index, source_lang="Auto-Detect", target_lang="English", engine="Google"):
+def rescan_translator_page(page_index, source_lang="Auto-Detect", target_lang="English", engine="Google", ocr_tier="Standard"):
     """Forces a single page to be re-scanned and translated."""
-    return translator.start_translation(source_lang, target_lang, engine, pages_to_process=[page_index])
+    return translator.start_translation(source_lang, target_lang, engine, pages_to_process=[page_index], ocr_tier=ocr_tier)
 
 @eel.expose
 def stop_translation():
