@@ -58,12 +58,25 @@ class WebTranslatorManager:
         # Fallback: if bundled tesseract not found, try system PATH
         if not os.path.exists(self.tesseract_path):
             self.tesseract_path = "tesseract"
+            
+        self.glossary = self._load_glossary()
+
+    def _load_glossary(self):
+        try:
+            path = get_app_path("terminology.json")
+            if os.path.exists(path):
+                import json
+                with open(path, "r", encoding="utf-8") as f:
+                    return json.load(f)
+        except Exception as e:
+            print(f"Glossary load error: {e}")
+        return {}
 
     # ------------------------------------------------------------------
     # PDF LOADING
     # ------------------------------------------------------------------
 
-    def load_pdf(self, file_path):
+    def load_pdf(self, file_path, folder_name=None):
         """Opens a PDF, extracts page count, renders first page image, returns metadata."""
         if not file_path or not os.path.exists(file_path):
             return {"success": False, "error": "File not found."}
@@ -82,9 +95,10 @@ class WebTranslatorManager:
             book_name = os.path.basename(file_path).replace(".pdf", "")
             
             # Create a unique but consistent cache dir name
-            import hashlib
-            hasher = hashlib.md5(file_path.encode('utf-8'))
-            folder_name = f"{book_name}_{hasher.hexdigest()[:8]}"
+            if not folder_name:
+                import hashlib
+                hasher = hashlib.md5(file_path.encode('utf-8'))
+                folder_name = f"{book_name}_{hasher.hexdigest()[:8]}"
             
             from utils import get_app_path
             self.cache_dir = get_app_path(os.path.join(".translator_cache", folder_name))
@@ -100,13 +114,35 @@ class WebTranslatorManager:
             self.current_page = 0
             self.all_page_data = [None] * num_pages
 
+            # SCAN FOR EXISTING CACHED PAGES
+            print(f"[Core] Scanning for cache files in: {self.cache_dir}", flush=True)
+            for cache_file in os.listdir(self.cache_dir):
+                if cache_file.startswith("page_") and cache_file.endswith(".json"):
+                    try:
+                        p_idx = int(cache_file.replace("page_", "").replace(".json", ""))
+                        if 0 <= p_idx < num_pages:
+                            with open(os.path.join(self.cache_dir, cache_file), "r", encoding="utf-8") as f:
+                                self.all_page_data[p_idx] = json.load(f)
+                                print(f"  -> Restored page {p_idx} from cache", flush=True)
+                    except Exception as e:
+                        print(f"  -> Failed to parse {cache_file}: {e}", flush=True)
+
             # Generate/Update project_info.json
             info_path = os.path.join(self.cache_dir, "project_info.json")
+            
+            # Determine correct resume page dynamically
+            first_untranslated = 0
+            for i in range(num_pages):
+                if not self.all_page_data[i] or not self.all_page_data[i].get("english") or "[Translation" in self.all_page_data[i].get("english", ""):
+                    first_untranslated = i
+                    break
+            self.current_page = first_untranslated
+
             if not os.path.exists(info_path):
                 metadata = {
                     "book_name": book_name,
                     "total_pages": num_pages,
-                    "last_translated_page": 0,
+                    "last_translated_page": first_untranslated,
                     "source_lang": self.source_lang,
                     "target_lang": self.target_lang,
                     "last_accessed": time.time(),
@@ -115,11 +151,12 @@ class WebTranslatorManager:
                 with open(info_path, "w", encoding="utf-8") as f:
                     json.dump(metadata, f, indent=4)
             else:
-                # Update timestamp
+                # Update timestamp and resume page
                 try:
                     with open(info_path, "r", encoding="utf-8") as f:
                         metadata = json.load(f)
                     metadata["last_accessed"] = time.time()
+                    metadata["last_translated_page"] = first_untranslated
                     with open(info_path, "w", encoding="utf-8") as f:
                         json.dump(metadata, f, indent=4)
                 except:
@@ -181,6 +218,8 @@ class WebTranslatorManager:
         img_path = self.get_page_image_path(page_idx)
 
         data = self.all_page_data[page_idx] if page_idx < len(self.all_page_data) else None
+        
+        print(f"[Core] get_page_data({page_idx}): Image={img_path is not None}, DataLoaded={data is not None}", flush=True)
 
         return {
             "success": True,
@@ -199,20 +238,7 @@ class WebTranslatorManager:
     # TRANSLATION PIPELINE
     # ------------------------------------------------------------------
 
-    def rebalance_scripts(self, text):
-        """Fixes common French/Greek script confusion and bracket mangling."""
-        if not text: return ""
-        import re
-        text = re.sub(r'\bἰ[οo]\b', 'le', text)
-        text = re.sub(r'\bἰ[δθ]\b', 'le', text)
-        text = re.sub(r' ([αα]ο|οα) ', ' le ', text)
-        text = re.sub(r'\({2,}', '(', text)
-        text = re.sub(r'\){2,}', ')', text)
-        text = re.sub(r'\(\(\. ', '(f. ', text)
-        text = re.sub(r'6\"-7', '6-7', text)
-        text = re.sub(r'\bἰο\b', 'le', text)
-        text = re.sub(r'ἰο tome', 'le tome', text)
-        return text
+
 
     def start_translation(self, source_lang="Auto-Detect", target_lang="English", engine="Google", pages_to_process=None):
         """Begins the OCR + Translation pipeline in a background thread."""
@@ -246,13 +272,22 @@ class WebTranslatorManager:
             page_width = doc[0].rect.width
             doc.close()
 
-            loop_iterable = pages_to_process if pages_to_process is not None else range(self.total_pages)
+            loop_iterable = pages_to_process if pages_to_process is not None else range(self.current_page, self.total_pages)
 
             for page_num in loop_iterable:
                 if self.stop_requested:
                     break
 
-                # Send progress update to frontend
+                # Skip if already processed (unless we are specifically targeting it)
+                if pages_to_process is None:
+                    existing = self.all_page_data[page_num]
+                    if existing and existing.get("english"):
+                        eng = existing["english"]
+                        # Do NOT skip if the page has a pending or error marker
+                        if not any(err in eng for err in ["[Translation Pending]", "[Translation Error", "[Failed]", "[OCR Error"]):
+                            continue
+
+                # Send progress update to frontend (AFTER SKIP CHECK to prevent page 1 reset)
                 progress_pct = int(((page_num) / self.total_pages) * 100)
                 try:
                     eel.update_translator_progress({
@@ -264,21 +299,17 @@ class WebTranslatorManager:
                 except:
                     pass
 
-                # Skip if already processed (unless we are specifically targeting it)
-                if pages_to_process is None:
-                    existing = self.all_page_data[page_num]
-                    if existing and existing.get("english"):
-                        eng = existing["english"]
-                        # Do NOT skip if the page has a pending or error marker
-                        if not any(err in eng for err in ["[Translation Pending]", "[Translation Error", "[Failed]", "[OCR Error"]):
-                            continue
-
                 # Phase 1: OCR
                 is_fallback = (pages_to_process is not None)
                 try:
+                    is_rtl = False
+                    if not is_auto and self.source_lang in LANGUAGES:
+                        if self.source_lang in ["Arabic", "Hebrew", "Yiddish"]:
+                            is_rtl = True
+                            
                     res = ocr_worker(
                         page_num, self.pdf_path, ocr_lang_code, is_auto,
-                        LANGUAGES, translator_src, page_width, False, self.tesseract_path,
+                        LANGUAGES, translator_src, page_width, is_rtl, self.tesseract_path,
                         fallback_mode=is_fallback
                     )
                 except Exception as e:
@@ -288,10 +319,6 @@ class WebTranslatorManager:
                     break
 
                 if res and "error" not in res:
-                    # Clean up common OCR artifacts before translation
-                    if res.get("original"):
-                        res["original"] = self.rebalance_scripts(res["original"])
-
                     self.all_page_data[page_num] = res
                     self._save_page_cache(res)
 
@@ -315,6 +342,7 @@ class WebTranslatorManager:
                             translator_src=src,
                             target_lang=target_trans,
                             engine=self.engine,
+                            glossary=self.glossary
                         )
 
                         if self.stop_requested:
@@ -327,11 +355,6 @@ class WebTranslatorManager:
                             self.all_page_data[page_num]["english"] = f"[Translation Error: {t_res['error'][:100]}]"
 
                         self._save_page_cache(self.all_page_data[page_num])
-                        
-                        # Stealth throttle to avoid hitting Google Translate API limits
-                        import time
-                        import random
-                        time.sleep(3.0 + random.uniform(0.1, 0.5))
                     else:
                         # Image-only or blank page
                         self.all_page_data[page_num]["english"] = source_text

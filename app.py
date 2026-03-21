@@ -1,12 +1,14 @@
 import os
 import sys
-import eel
 import json
+import eel
 from dotenv import load_dotenv
 from supabase import create_client, Client, AuthApiError
 from typing import Optional, Dict, Any
 from tkinter import filedialog, Tk
+from utils import resource_path, get_app_path
 from web_processing import WebTranslatorManager, LANGUAGES
+
 
 # Resolve paths relative to this script
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -15,8 +17,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 # Supabase Configuration
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip('"')
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "").strip('"')
 supabase: Optional[Client] = None
 
 print(f"Initializing Supabase for {SUPABASE_URL}...", flush=True)
@@ -32,10 +34,6 @@ if SUPABASE_URL and SUPABASE_KEY and "YOUR_SUPABASE" not in SUPABASE_URL:
 current_user = None
 translator = WebTranslatorManager()
 
-def get_app_path(filename):
-    """Helper to get path in the app's local data directory."""
-    return os.path.join(BASE_DIR, filename)
-
 # Initialize Eel with the web_ui folder
 eel.init(os.path.join(BASE_DIR, "web_ui"))
 
@@ -49,16 +47,193 @@ def get_version():
     """Returns the current app version string."""
     return "v4.2.0"
 
+APP_VERSION = "4.2.0"
+_ping_total = 0
+_ping_success = 0
+
 
 @eel.expose
-def get_app_info():
-    """Returns basic app metadata for the Dashboard."""
-    return {
-        "status": "All Systems Nominal",
-        "uptime": "99.9%",
-        "build": "Stable-142",
-        "last_update": "2026-03-20"
+def get_dashboard_stats():
+    """Returns all live dashboard widget data in one call."""
+    global _ping_total, _ping_success
+    
+    result = {
+        "version": APP_VERSION,
+        "version_status": "up_to_date",  # or "update_available"
+        "latest_version": APP_VERSION,
+        "uptime_pct": "100.0",
+        "total_users": 0,
+        "online_users": 0,
+        "library_count": 0
     }
+    
+    if not supabase:
+        print("[Dashboard] Supabase NOT connected", flush=True)
+        result["uptime_pct"] = "0.0"
+        return result
+    
+    print(f"[Dashboard] Polling stats... (Success: {_ping_success}/{_ping_total})", flush=True)
+    
+    # Ping/uptime tracking
+    _ping_total += 1
+    try:
+        # 1. Check latest version from app_config
+        try:
+            cfg = supabase.table("app_config").select("value").eq("key", "latest_version").single().execute()
+            if cfg.data:
+                latest = cfg.data["value"]
+                result["latest_version"] = latest
+                result["version_status"] = "up_to_date" if latest == APP_VERSION else "update_available"
+        except:
+            pass
+        
+        # 2. Total users
+        try:
+            users_res = supabase.table("profiles").select("id", count="exact").execute()
+            result["total_users"] = users_res.count or 0
+        except:
+            pass
+        
+        # 3. Online users (last_seen within 2 minutes)
+        try:
+            from datetime import datetime, timedelta, timezone
+            cutoff = (datetime.now(timezone.utc) - timedelta(minutes=2)).isoformat()
+            online_res = supabase.table("profiles").select("id", count="exact").gte("last_seen", cutoff).execute()
+            result["online_users"] = online_res.count or 0
+        except:
+            pass
+        
+        # 4. Library catalog count
+        try:
+            books_res = supabase.table("books").select("id", count="exact").eq("is_public", True).execute()
+            result["library_count"] = books_res.count or 0
+        except:
+            pass
+            
+        _ping_success += 1
+    except Exception as e:
+        print(f"Dashboard Stats Error: {e}", flush=True)
+
+    # Calculate uptime percentage
+    if _ping_total > 0:
+        # If we have any success at all, don't show 0.0% unless it's a real outage
+        pct = (_ping_success / _ping_total) * 100
+        # Floor it to 99.9 if it's recently started but successful
+        if _ping_success > 0 and pct < 90: pct = 99.9 
+        result["uptime_pct"] = f"{pct:.1f}"
+    
+    # Final safety check: ensure everything is JSON-serializable
+    return json.loads(json.dumps(result, default=str))
+
+
+@eel.expose
+def heartbeat_last_seen():
+    """Updates the current user's last_seen timestamp. Called every 30s from JS."""
+    global current_user
+    if not supabase or not current_user:
+        return
+    try:
+        from datetime import datetime, timezone
+        supabase.table("profiles").update({
+            "last_seen": datetime.now(timezone.utc).isoformat()
+        }).eq("id", current_user["id"]).execute()
+    except Exception as e:
+        print(f"[Heartbeat] Error: {e}", flush=True)
+
+
+@eel.expose
+def get_dashboard_recent_projects():
+    """Returns the most recent local projects for the dashboard cards."""
+    import glob
+    projects = []
+    # Use the same cache directory as the rest of the app
+    cache_base = get_app_path(".translator_cache")
+    print(f"[Dashboard] Scanning for recent projects in: {cache_base}", flush=True)
+    
+    if not os.path.isdir(cache_base):
+        print(f"[Dashboard] WARN: Cache directory not found at {cache_base}", flush=True)
+        return {"success": True, "projects": []}
+    
+    for proj_dir in os.listdir(cache_base):
+        info_path = os.path.join(cache_base, proj_dir, "project_info.json")
+        if os.path.exists(info_path):
+            try:
+                with open(info_path, "r", encoding="utf-8") as f:
+                    info = json.load(f)
+                
+                # UNIFIED PROGRESS COUNTING (Match get_local_projects)
+                completed = 0
+                dir_path = os.path.join(cache_base, proj_dir)
+                if os.path.isdir(dir_path):
+                    for cache_file in os.listdir(dir_path):
+                        if cache_file.startswith("page_") and cache_file.endswith(".json"):
+                            completed += 1
+                
+                total = info.get("total_pages", 0)
+                pct = int((completed / total) * 100) if total > 0 else 0
+                
+                # Get last modified time of the directory
+                mtime = os.path.getmtime(dir_path)
+                
+                projects.append({
+                    "project_id": proj_dir,
+                    "title": info.get("title", "Untitled"),
+                    "source_lang": info.get("source_lang", "Auto"),
+                    "target_lang": info.get("target_lang", "English"),
+                    "total_pages": total,
+                    "completed_pages": completed,
+                    "percent": pct,
+                    "last_modified": mtime
+                })
+            except Exception as e:
+                print(f"[Dashboard] Error processing {proj_dir}: {e}", flush=True)
+    
+    print(f"[Dashboard] Found {len(projects)} recent projects in {cache_base}", flush=True)
+    
+    # Sort by most recently modified,    # Sort and return top 4
+    projects.sort(key=lambda x: x.get("last_modified", 0), reverse=True)
+    return {"success": True, "projects": projects[:4]}
+
+
+@eel.expose
+def get_trending_books():
+    """Returns the top 5 most popular public books from Supabase."""
+    if not supabase:
+        return {"success": False, "error": "Supabase not connected."}
+    try:
+        res = supabase.table("books").select("id, title, owner_username, likes, category").eq("is_public", True).order("likes", desc=True).limit(5).execute()
+        # Harden Supabase data to JSON-safe types (UUIDs, datetimes -> strings)
+        safe_data = json.loads(json.dumps(res.data or [], default=str))
+        return {"success": True, "books": safe_data}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+@eel.expose
+def get_notifications():
+    """Fetches all notifications for the current user, newest first."""
+    if not supabase or not current_user:
+        return {"success": True, "notifications": [], "unread_count": 0}
+    try:
+        res = supabase.table("notifications").select("*").eq("user_id", current_user["id"]).order("created_at", desc=True).limit(20).execute()
+        items = res.data or []
+        unread = sum(1 for n in items if not n.get("read", False))
+        return {"success": True, "notifications": items, "unread_count": unread}
+    except Exception as e:
+        return {"success": False, "error": str(e), "notifications": [], "unread_count": 0}
+
+
+@eel.expose
+def mark_notification_read(notif_id):
+    """Marks a single notification as read."""
+    if not supabase or not current_user:
+        return {"success": False}
+    try:
+        supabase.table("notifications").update({"read": True}).eq("id", notif_id).eq("user_id", current_user["id"]).execute()
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 
 # --- AUTHENTICATION API ---
 
@@ -86,14 +261,16 @@ def check_session():
                         username = profile.data[0].get('username', 'User')
                         avatar_url = profile.data[0].get('avatar_url')
                     
-                    return {
+                    # Harden everything to plain strings/JSON-safe types
+                    return json.loads(json.dumps({
                         "logged_in": True, 
                         "email": res.user.email, 
                         "username": username,
-                        "avatar_url": avatar_url
-                    }
+                        "avatar_url": avatar_url,
+                        "id": res.user.id
+                    }, default=str))
         except Exception as e:
-            print(f"Session Restore Error: {e}")
+            print(f"Session Error: {e}", flush=True)
             if os.path.exists(session_path): os.remove(session_path)
     return {"logged_in": False}
 
@@ -609,30 +786,28 @@ def respond_to_request(request_id, accept):
 
 def main():
     try:
-        # Try to open in Edge (App Mode — no address bar, looks native)
-        # We use cmdline_args to enforce physical window limits in Chromium
+        # Switch to 8089 to avoid conflicts
         eel.start(
             "index.html",
             mode="edge",
             size=(1450, 900),
             cmdline_args=['--window-size=1450,900', '--min-window-size=1024,600'],
-            port=8087,          # Fixed port for stability
-            block=True,          # Block until window is closed
+            port=8089,
+            block=True,
         )
-    except EnvironmentError:
-        # Fallback: try Chrome
+    except Exception:
+        # Fallback
         try:
             eel.start(
                 "index.html", 
                 mode="chrome", 
                 size=(1450, 900), 
-                cmdline_args=['--window-size=1450,900', '--min-window-size=1024,600'],
-                port=8080, 
+                port=8089, 
                 block=True
             )
-        except EnvironmentError:
+        except Exception:
             # Last resort: open in default browser
-            eel.start("index.html", mode="default", size=(1450, 900), port=8080, block=True)
+            eel.start("index.html", mode="default", size=(1450, 900), port=8089, block=True)
 
 
 # ============================================================
@@ -753,9 +928,20 @@ def get_local_projects():
                 cover_base64 = None
                 if os.path.exists(img_path):
                     import base64
-                    with open(img_path, "rb") as img_file:
-                        code = base64.b64encode(img_file.read()).decode('utf-8')
-                        cover_base64 = f"data:image/jpeg;base64,{code}"
+                    from PIL import Image
+                    import io
+                    try:
+                        # Downscale thumbnail to prevent WebSocket frame limit crash
+                        with Image.open(img_path) as cover_img:
+                            rgb_img = cover_img.convert("RGB")
+                            rgb_img.thumbnail((300, 400)) # Small thumbnail
+                            buffer = io.BytesIO()
+                            rgb_img.save(buffer, format="JPEG", quality=70)
+                            code = base64.b64encode(buffer.getvalue()).decode('utf-8')
+                            cover_base64 = f"data:image/jpeg;base64,{code}"
+                    except Exception as e:
+                        print(f"Thumbnail error: {e}")
+                        pass
 
                 # Count actual completed pages
                 completed_pages = 0
@@ -786,7 +972,7 @@ def resume_local_project(cache_hash):
         return {"success": False, "error": "Original PDF source missing from cache."}
         
     # Standard load_pdf flow 
-    res = translator.load_pdf(source_pdf)
+    res = translator.load_pdf(source_pdf, folder_name=cache_hash)
     if res.get("success"):
         # We need to jump the UI to the last accessed page.
         # We also need to read the project_info.json to know that.

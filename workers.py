@@ -175,18 +175,26 @@ def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translato
                 translator_src = detected["trans"]
                 worker_log(f"Script detected: {ocr_lang}")
             
+            # SPRINT 82: Arabic Morphological Enhancement (Reconnects dots & cursive ligatures)
+            if "ara" in ocr_lang:
+                worker_log("Applying Arabic cursive morphological enhancements...")
+                # Text is black (0), background white (255). To thicken text, we erode the background.
+                kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+                morphed_thresh = cv2.erode(thresh, kernel, iterations=1)
+                final_pil = Image.fromarray(morphed_thresh)
+            else:
+                final_pil = processed_pil
+            
             # SPRINT 81: Dynamic PSM Logic
             if fallback_mode:
                 psm_cfg = '--oem 1 --psm 6' # Try Harder mode: assume uniform block of text
-            elif any(x in ocr_lang for x in ["ara", "heb", "yid"]):
-                psm_cfg = '--oem 1 --psm 6' # Block mode for joined scripts
             elif any(x in ocr_lang for x in ["chi_sim", "jpn", "kor"]):
                 psm_cfg = '--oem 1 --psm 3' # Column/Standard for Asian
             else:
                 psm_cfg = '--oem 1 --psm 3'
             worker_log(f"Starting main OCR ({ocr_lang})...")
             try:
-                raw_ocr = pytesseract.image_to_string(processed_pil, lang=ocr_lang, config=psm_cfg, timeout=60).strip()
+                raw_ocr = pytesseract.image_to_string(final_pil, lang=ocr_lang, config=psm_cfg, timeout=60).strip()
                 ocr_text = clean_ocr_text(raw_ocr)
                 worker_log(f"Main OCR complete. Found {len(ocr_text)} chars.")
             except Exception as e:
@@ -196,6 +204,11 @@ def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translato
             
             # Phase 1 extraction cleanup
             if len(ocr_text) < 15: is_real_image = True
+            
+        # Transform Western digits to Eastern Arabic digits to preserve pure RTL flow
+        if "ara" in ocr_lang and ocr_text:
+            western_to_eastern = str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩")
+            ocr_text = ocr_text.translate(western_to_eastern)
             
         # SPRINT 31: Numeral Shield for original text
         ocr_text = re.sub(r'(\d+[\-/]\d+[\-/]?[0-9]*[\-/]?[0-9]*)', u' \u2066\\1\u2069 ', ocr_text)

@@ -150,3 +150,59 @@ CREATE POLICY "Insert Book Likes" ON book_likes FOR INSERT WITH CHECK (auth.uid(
 
 DROP POLICY IF EXISTS "Delete Book Likes" ON book_likes;
 CREATE POLICY "Delete Book Likes" ON book_likes FOR DELETE USING (auth.uid() = user_id);
+
+-- ==========================================
+-- 5. DASHBOARD & SOCIAL INFRASTRUCTURE (v4.3)
+-- ==========================================
+
+-- Add last_seen to profiles for online status tracking
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS last_seen TIMESTAMPTZ;
+
+-- Add view_count to books for trending calculation
+ALTER TABLE books ADD COLUMN IF NOT EXISTS view_count INTEGER DEFAULT 0;
+
+-- App Config Table (stores latest_version, etc.)
+CREATE TABLE IF NOT EXISTS app_config (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Seed the version config row (skip if already exists)
+INSERT INTO app_config (key, value)
+VALUES ('latest_version', '4.2.0')
+ON CONFLICT (key) DO NOTHING;
+
+-- Notifications Table
+CREATE TABLE IF NOT EXISTS notifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    type TEXT NOT NULL DEFAULT 'system',
+    title TEXT NOT NULL,
+    message TEXT,
+    link_tab TEXT,
+    link_data TEXT,
+    read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS on new tables
+ALTER TABLE app_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+
+-- APP CONFIG POLICIES (read-only for everyone)
+DROP POLICY IF EXISTS "Select App Config" ON app_config;
+CREATE POLICY "Select App Config" ON app_config FOR SELECT USING (true);
+
+-- NOTIFICATIONS POLICIES
+DROP POLICY IF EXISTS "Select Own Notifications" ON notifications;
+CREATE POLICY "Select Own Notifications" ON notifications FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Insert Notifications" ON notifications;
+CREATE POLICY "Insert Notifications" ON notifications FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Update Own Notifications" ON notifications;
+CREATE POLICY "Update Own Notifications" ON notifications FOR UPDATE USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Delete Own Notifications" ON notifications;
+CREATE POLICY "Delete Own Notifications" ON notifications FOR DELETE USING (auth.uid() = user_id);
