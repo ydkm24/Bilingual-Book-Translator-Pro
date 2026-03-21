@@ -1,0 +1,2862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[PDF_TRANSLATOR_v4.2.0]</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script type="text/javascript" src="/eel.js"></script>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- NARROW SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-icon active" data-tab="dashboard" onclick="switchTab('dashboard', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>Dash<br>board</span>
+            </div>
+            <div class="sidebar-icon" data-tab="translator" onclick="switchTab('translator', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span>PDF<br>Translator</span>
+            </div>
+            <div class="sidebar-icon" data-tab="quicktranslate" onclick="switchTab('quicktranslate', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg>
+                <span>Quick<br>Translate</span>
+            </div>
+            <div class="sidebar-icon" data-tab="projects" onclick="switchTab('projects', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                <span>My<br>Projects</span>
+            </div>
+            <div class="sidebar-icon" data-tab="library" onclick="switchTab('library', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span>Global<br>Library</span>
+            </div>
+            <div class="sidebar-icon" data-tab="social" onclick="switchTab('social', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>Social<br>Hub</span>
+            </div>
+            <div class="sidebar-spacer"></div>
+            <div class="sidebar-icon" id="sidebarSettingsBtn" data-tab="settings" onclick="switchTab('settings', this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>Settings</span>
+            </div>
+            <div class="sidebar-icon" id="sidebarProfileBtn" onclick="openLoginModal()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Log In</span>
+            </div>
+        </aside>
+
+        <!-- MAIN WORKSPACE -->
+        <main class="workspace">
+            
+            <!-- CUSTOM TITLE BAR -->
+            <div class="title-bar">
+                <span class="title-text">[TRANSLATOR_NET_v4.2.0]</span>
+                <div class="title-bar-right">
+                    <div class="title-notif-btn" onclick="toggleNotifDropdown()">
+                        🔔 <span class="notif-badge">3</span>
+                    </div>
+                    <span class="title-close">×</span>
+                </div>
+                
+                <!-- NOTIFICATION DROPDOWN -->
+                <div class="notif-dropdown" id="notifDropdown" style="display:none;">
+                    <div class="notif-dropdown-header">RECENT NOTIFICATIONS</div>
+                    <div class="dash-notif-list">
+                        <div class="dash-notif" onclick="openSocialHub()">
+                            <span class="notif-icon">👤</span>
+                            <div class="notif-text">
+                                <span class="notif-user">@CodeShredder</span> sent you a friend request
+                                <div class="notif-time">2 minutes ago</div>
+                            </div>
+                        </div>
+                        <div class="dash-notif" onclick="openSocialHub()">
+                            <span class="notif-icon">📚</span>
+                            <div class="notif-text">
+                                <span class="notif-user">@NetReaver</span> shared "Russian Classics"
+                                <div class="notif-time">1 hour ago</div>
+                            </div>
+                        </div>
+                        <div class="dash-notif" onclick="openSocialHub()">
+                            <span class="notif-icon">💬</span>
+                            <div class="notif-text">
+                                New message from <span class="notif-user">@Cipher_X</span>
+                                <div class="notif-time">3 hours ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== -->
+            <!-- TAB: DASHBOARD            -->
+            <!-- ======================== -->
+            <div class="tab-page active" id="tab-dashboard">
+                <div class="page-content dash-page">
+                    <!-- Welcome Header -->
+                    <div class="dash-welcome">
+                        <div class="dash-welcome-text">
+                            <div class="page-title">🏠 DASHBOARD</div>
+                            <div class="dash-greeting">Welcome back, <span class="dash-username">Translator</span> — here's your workspace at a glance.</div>
+                        </div>
+                        <div class="dash-sys-status">
+                            <span class="sys-dot"></span>
+                            <span>SYS OPERATIONAL</span>
+                        </div>
+                    </div>
+
+                    <!-- Stat Widgets Row -->
+                    <div class="dash-stats-row">
+                        <div class="dash-stat">
+                            <div class="dash-stat-icon" style="font-size:24px;">⚙️</div>
+                            <div class="dash-stat-info">
+                                <div class="dash-stat-number" style="font-size:18px;">Build v4.2</div>
+                                <div class="dash-stat-label">Current Release</div>
+                                <div class="dash-stat-live"><span class="live-dot"></span> Up To Date</div>
+                            </div>
+                        </div>
+                        <div class="dash-stat">
+                            <div class="dash-stat-icon" style="font-size:24px;">🟢</div>
+                            <div class="dash-stat-info">
+                                <div class="dash-stat-number">99.9%</div>
+                                <div class="dash-stat-label">Network Uptime</div>
+                                <div class="dash-stat-live"><span class="live-dot"></span> All Systems Nominal</div>
+                            </div>
+                        </div>
+                        <div class="dash-stat">
+                            <div class="dash-stat-icon" style="font-size:24px;">👥</div>
+                            <div class="dash-stat-info">
+                                <div class="dash-stat-number">15,240</div>
+                                <div class="dash-stat-label">Total Network Users</div>
+                                <div class="dash-stat-live"><span class="live-dot"></span> 342 Nodes Online</div>
+                            </div>
+                        </div>
+                        <div class="dash-stat">
+                            <div class="dash-stat-icon" style="font-size:24px;">📚</div>
+                            <div class="dash-stat-info">
+                                <div class="dash-stat-number">8,901</div>
+                                <div class="dash-stat-label">Library Catalog</div>
+                                <div class="dash-stat-live" style="color:var(--text-green-dim);"><span class="live-dot" style="animation:none;opacity:0.5; background:var(--text-muted);"></span> Indexed</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Two-Column: Recent Projects + Right Panel -->
+                    <div class="dash-main-grid">
+                        <!-- Left: Recent Projects -->
+                        <div class="dash-section">
+                            <div class="section-label">📂 RECENT PROJECTS</div>
+                            <div class="dash-projects-list">
+                                <div class="dash-project-card" onclick="switchTab('translator', document.querySelector('[data-tab=translator]'))">
+                                    <div class="dash-project-cover">📕</div>
+                                    <div class="dash-project-info">
+                                        <div class="dash-project-name">Hebrew Torah Commentary</div>
+                                        <div class="dash-project-meta">English → Hebrew • Last edited 2h ago</div>
+                                        <div class="dash-project-progress-bar"><div class="dash-project-fill" style="width:45%"></div></div>
+                                        <div class="dash-project-percent">45% complete • Page 45/100</div>
+                                    </div>
+                                </div>
+                                <div class="dash-project-card">
+                                    <div class="dash-project-cover">📗</div>
+                                    <div class="dash-project-info">
+                                        <div class="dash-project-name">Arabic Poetry Collection</div>
+                                        <div class="dash-project-meta">Arabic → English • Last edited 1d ago</div>
+                                        <div class="dash-project-progress-bar"><div class="dash-project-fill" style="width:78%"></div></div>
+                                        <div class="dash-project-percent">78% complete • Page 156/200</div>
+                                    </div>
+                                </div>
+                                <div class="dash-project-card">
+                                    <div class="dash-project-cover">📘</div>
+                                    <div class="dash-project-info">
+                                        <div class="dash-project-name">German Technical Manual</div>
+                                        <div class="dash-project-meta">German → English • Last edited 3d ago</div>
+                                        <div class="dash-project-progress-bar"><div class="dash-project-fill" style="width:12%"></div></div>
+                                        <div class="dash-project-percent">12% complete • Page 6/50</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Trending -->
+                        <div class="dash-right-col">
+                            <!-- Trending -->
+                            <div class="dash-section">
+                                <div class="section-label">🔥 TRENDING IN LIBRARY</div>
+                                <div class="dash-trending-list">
+                                    <div class="dash-trending-item">
+                                        <span class="trending-rank">#1</span>
+                                        <div class="trending-info">
+                                            <div class="trending-title">Complete Talmud Translation</div>
+                                            <div class="trending-meta">by @HackerOne • ❤️ 2,401 reads</div>
+                                        </div>
+                                    </div>
+                                    <div class="dash-trending-item">
+                                        <span class="trending-rank">#2</span>
+                                        <div class="trending-info">
+                                            <div class="trending-title">Modern Arabic Grammar Guide</div>
+                                            <div class="trending-meta">by @DataGhost • ❤️ 1,893 reads</div>
+                                        </div>
+                                    </div>
+                                    <div class="dash-trending-item">
+                                        <span class="trending-rank">#3</span>
+                                        <div class="trending-info">
+                                            <div class="trending-title">Japanese Manga Vol. 12</div>
+                                            <div class="trending-meta">by @CodeShredder • ❤️ 1,220 reads</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== -->
+            <!-- TAB: TRANSLATOR          -->
+            <!-- ======================== -->
+            <div class="tab-page" id="tab-translator">
+
+                <!-- STATE 1: DROP ZONE (shown on app open) -->
+                <div class="translator-dropzone-state" id="translator-dropzone-state"
+                     ondragover="event.preventDefault(); this.querySelector('.translator-dropzone').classList.add('drag-hover')"
+                     ondragleave="this.querySelector('.translator-dropzone').classList.remove('drag-hover')"
+                     ondrop="handlePDFDrop(event)">
+                    <div class="translator-dropzone" onclick="handlePDFClick()">
+                        <div class="translator-drop-icon">📄</div>
+                        <div class="translator-drop-title">Drop a PDF here or click to browse</div>
+                        <div class="translator-drop-hint">Supports PDF files up to 200MB</div>
+                        <div class="translator-drop-formats">
+                            <span class="format-tag">PDF</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STATE 2: ACTIVE WORKSPACE (hidden until PDF loaded) -->
+                <div class="translator-workspace" id="translator-workspace" style="display:none;">
+                    <header class="top-bar">
+                        <div class="search-box">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="translatorSearchInput" placeholder="Search text in book... (Enter)" onkeydown="if(event.key==='Enter') searchPDFContent()">
+                        </div>
+                        <div class="progress-module">
+                            <span class="progress-label" id="translator-progress-label">Ready — Press START to begin translation</span>
+                            <div class="progress-track">
+                                <div class="progress-fill" id="translator-progress-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div class="top-bar-controls">
+                            <button class="footer-btn" id="translator-rescan-btn" onclick="triggerRescanCurrentPage()" title="Force a re-scan of this specific page">🔍 RESCAN PAGE</button>
+                            <button class="translator-start-btn" id="translator-start-btn" onclick="toggleTranslation()">▶ START</button>
+                            <button class="translator-clear-btn" onclick="clearTranslator()">🗑 CLEAR</button>
+                        </div>
+                    </header>
+
+                    <section class="panes-grid">
+                        <div class="pane">
+                            <div class="pane-header">
+                                <span>ORIGINAL PDF IMAGE</span>
+                                <span class="pane-meta" id="translatorImageMeta">[page]</span>
+                            </div>
+                            <div class="pane-content image-area">
+                                <div class="image-placeholder" id="translatorImageArea">
+                                    <div style="text-align:center; color:var(--text-muted); font-family:var(--font-mono); font-size:12px;">📄 Load a PDF to see its pages</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pane">
+                            <div class="pane-header">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span>OCR TEXT</span>
+                                    <span class="pane-meta" id="translatorOCRMeta">[Source]</span>
+                                </div>
+                                <div class="pane-tools">
+                                    <button class="footer-btn action-copy-btn" style="font-size:10px" onclick="copyTextToClipboard('translatorOCRText', this)">📋 Copy</button>
+                                </div>
+                            </div>
+                            <div class="pane-content code-area">
+                                <textarea class="code-block" id="translatorOCRText" oninput="saveTranslatorEdits()" placeholder="No content loaded."></textarea>
+                            </div>
+                        </div>
+                        <div class="pane">
+                            <div class="pane-header">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span>TRANSLATED TEXT</span>
+                                    <span class="pane-meta" id="translatorTransMeta">[Target]</span>
+                                </div>
+                                <div class="pane-tools">
+                                    <button class="footer-btn action-copy-btn" style="font-size:10px" onclick="copyTextToClipboard('translatorTransText', this)">📋 Copy</button>
+                                </div>
+                            </div>
+                            <div class="pane-content code-area">
+                                <textarea class="code-block" id="translatorTransText" oninput="saveTranslatorEdits()" placeholder="No content loaded."></textarea>
+                            </div>
+                        </div>
+                    </section>
+
+                    <footer class="bottom-footer">
+                        <div class="footer-left">
+                            <span class="footer-label">Page:</span>
+                            <input type="number" class="page-jump-input" id="translatorPageJump" value="1" min="1" max="1" onkeydown="if(event.key==='Enter') jumpToTranslatorPage()">
+                            <span class="footer-label" id="translatorPageTotal">/ 1</span>
+                            <button class="footer-btn" onclick="translatorPrevPage()">← PREV</button>
+                            <button class="footer-btn" onclick="translatorNextPage()">NEXT →</button>
+                        </div>
+                        <div class="footer-right" style="position:relative;">
+                            <span class="footer-label">SOURCE:</span>
+                            <select class="footer-select upward-select" id="translatorSourceLang"></select>
+                            <span class="footer-label">TARGET:</span>
+                            <select class="footer-select green upward-select" id="translatorTargetLang"></select>
+                            <button class="publish-btn" onclick="openPublishModal()">🚀 PUBLISH TO CLOUD</button>
+                        </div>
+                    </footer>
+
+                </div>
+            </div>
+
+            <!-- ======================== -->
+            <!-- TAB: QUICK TRANSLATE     -->
+            <!-- ======================== -->
+            <div id="qtModalBackdrop" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:9998;" onclick="closeQuickTranslateModal()"></div>
+            <div class="tab-page" id="tab-quicktranslate">
+                <div class="qt-modal-close-btn" style="display:none; position:absolute; right:15px; top:15px; font-size:24px; cursor:pointer; color:var(--text-muted); z-index:10001;" onclick="closeQuickTranslateModal()">×</div>
+                <!-- Quick Translate Top Bar -->
+                <div class="qt-page-toolbar">
+                    <div class="qt-lang-bar">
+                        <span class="footer-label">SOURCE:</span>
+                        <select class="footer-select upward-select" id="qtSourceLang"></select>
+                        <span class="qt-swap-btn" title="Swap Languages" onclick="swapQTLangs()">⇄</span>
+                        <span class="footer-label">TARGET:</span>
+                        <select class="footer-select green upward-select" id="qtTargetLang"></select>
+                    </div>
+                    <div class="qt-engine-bar">
+                        <span class="footer-label">ENGINE:</span>
+                        <select class="footer-select upward-select" id="qtEngineSelect">
+                            <option>Google</option>
+                            <option>DeepL</option>
+                            <option>GPT-4o</option>
+                            <option>Ollama (Local)</option>
+                        </select>
+                    </div>
+                    <div class="qt-mode-toggle">
+                        <button class="qt-mode-btn active" id="btn-qt-text" onclick="setQTMode('text', this)">📝 Text</button>
+                        <button class="qt-mode-btn" id="btn-qt-image" onclick="setQTMode('image', this)">📷 Image</button>
+                    </div>
+                    <button class="publish-btn" id="qtTranslateBtn" onclick="executeQuickTranslate()">⚡ TRANSLATE</button>
+                </div>
+
+                <!-- Text Mode -->
+                <div class="qt-full-content" id="qt-mode-text">
+                    <div class="qt-full-grid">
+                        <div class="qt-full-pane">
+                            <div class="pane-header">
+                                <span>INPUT [SOURCE]</span>
+                                <span class="pane-meta qt-char-count" id="qtTextCount">0 chars</span>
+                            </div>
+                            <textarea class="qt-full-textarea" id="qtTextInput" placeholder="Type or paste text to translate..." oninput="document.getElementById('qtTextCount').textContent = this.value.length + ' chars'"></textarea>
+                        </div>
+                        <div class="qt-full-pane">
+                            <div class="pane-header">
+                                <span>OUTPUT [TARGET]</span>
+                                <div class="pane-tools">
+                                    <button class="footer-btn action-copy-btn" style="font-size:10px" onclick="copyTextToClipboard('qtTextOutput', this)">📋 Copy</button>
+                                </div>
+                            </div>
+                            <textarea class="qt-full-textarea" id="qtTextOutput" placeholder="Translation will appear here..." readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Mode -->
+                <div class="qt-full-content" id="qt-mode-image" style="display:none">
+                    <div class="qt-image-layout">
+                        <div class="qt-full-pane">
+                            <div class="pane-header"><span>IMAGE INPUT</span></div>
+                            <div class="qt-dropzone-full" id="qtImageDropzone" onclick="triggerQTImageUpload()">
+                                <span class="qt-drop-icon">📷</span>
+                                <span id="qtImageStatus">Drop an image here or click to browse</span>
+                                <span class="qt-drop-hint">(Supports PNG, JPG, BMP)</span>
+                            </div>
+                            <!-- Hidden file input for image -->
+                            <input type="file" id="qtImageInput" style="display:none" accept="image/png, image/jpeg, image/bmp" onchange="handleQTImageSelect(event)">
+                        </div>
+                        <div class="qt-full-pane">
+                            <div class="pane-header">
+                                <span>OCR TRANSCRIPT</span>
+                                <span class="pane-meta">[Extracted Text]</span>
+                            </div>
+                            <textarea class="qt-full-textarea" id="qtOcrOutput" placeholder="Raw OCR text will appear here so you can verify accuracy before translation..."></textarea>
+                        </div>
+                        <div class="qt-full-pane">
+                            <div class="pane-header">
+                                <span>TRANSLATED OUTPUT</span>
+                                <div class="pane-tools">
+                                    <button class="footer-btn action-copy-btn" style="font-size:10px" onclick="copyTextToClipboard('qtImageTransOutput', this)">📋 Copy</button>
+                                </div>
+                            </div>
+                            <textarea class="qt-full-textarea" id="qtImageTransOutput" placeholder="Final translated text will appear here..." readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== -->
+            <!-- TAB: MY PROJECTS         -->
+            <!-- ======================== -->
+            <div class="tab-page" id="tab-projects">
+                <div class="page-content">
+                    <div class="page-title">📂 MY PROJECTS</div>
+                    <div id="projectsInProgress">
+                        <div class="section-label">IN PROGRESS</div>
+                        <div class="library-grid" id="projectsList">
+                            <!-- Dynamically populated -->
+                            <div class="status-msg">Fetching your projects...</div>
+                        </div>
+                    </div>
+                    <div id="projectsPublished">
+                        <div class="section-label" style="margin-top:30px">PUBLISHED (CLOUD)</div>
+                        <div class="library-grid" id="publishedList">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== -->
+            <!-- TAB: GLOBAL LIBRARY      -->
+            <!-- ======================== -->
+            <div class="tab-page" id="tab-library">
+                <div class="page-content">
+                    <div class="library-controls">
+                        <div class="search-container">
+                            <span class="search-icon">🔍</span>
+                            <input id="librarySearchInput" type="text" placeholder="Search Global Archives..." oninput="handleLibrarySearch(this.value)">
+                        </div>
+                    </div>
+
+                    <div id="libraryContainer">
+                        <!-- Categories and grids dynamically populated -->
+                        <div class="status-msg">Accessing the Neural Library...</div>
+                    </div>
+
+                    <!-- IN-PLACE READER VIEW (hidden until a book is clicked) -->
+                    <div id="libraryReaderView" style="display:none;" class="reader-container">
+                        <div class="reader-toolbar">
+                            <button class="reader-back-btn" onclick="closeLibraryReader()">← BACK TO LIBRARY</button>
+                            <div class="reader-book-info">
+                                <span class="reader-book-title" id="readerBookTitle">Book Title</span>
+                                <span class="reader-book-author" id="readerBookAuthor">by Author</span>
+                            </div>
+                            <div class="reader-page-nav">
+                                <button class="footer-btn" id="toggleImagePaneBtn" onclick="toggleReaderImagePane()" title="Toggle Original Image">🖼️ IMAGE</button>
+                                <button class="footer-btn" onclick="readerPrevPage()">← PREV</button>
+                                <span class="reader-page-counter" id="readerPageCounter">Page 1 / 1</span>
+                                <button class="footer-btn" onclick="readerNextPage()">NEXT →</button>
+                            </div>
+                        </div>
+
+                        <div class="reader-panes">
+                            <div class="reader-pane" id="readerImagePane">
+                                <div class="pane-header">
+                                    <span>ORIGINAL IMAGE</span>
+                                    <span class="pane-meta">[PDF]</span>
+                                </div>
+                                <div class="pane-content image-area">
+                                    <div class="image-placeholder" id="readerImageArea">
+                                        <div style="text-align:center; color:var(--text-muted); font-family:var(--font-mono); font-size:12px;">📄 Original PDF page will render here</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="reader-pane">
+                                <div class="pane-header">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span>ORIGINAL TEXT</span>
+                                        <span class="pane-meta" id="readerOrigLang">[Source]</span>
+                                    </div>
+                                    <div class="pane-tools">
+                                        <button class="footer-btn action-copy-btn" style="font-size:10px" onclick="copyTextToClipboard('readerOriginalText', this)">📋 Copy</button>
+                                    </div>
+                                </div>
+                                <div class="pane-content code-area">
+                                    <pre class="code-block" id="readerOriginalText">No content loaded.</pre>
+                                </div>
+                            </div>
+                            <div class="reader-pane">
+                                <div class="pane-header">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span>TRANSLATED TEXT</span>
+                                        <span class="pane-meta" id="readerTransLang">[Target]</span>
+                                    </div>
+                                    <div class="pane-tools">
+                                        <button class="footer-btn action-copy-btn" style="font-size:10px" onclick="copyTextToClipboard('readerTranslatedText', this)">📋 Copy</button>
+                                    </div>
+                                </div>
+                                <div class="pane-content code-area">
+                                    <pre class="code-block" id="readerTranslatedText">No content loaded.</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="reader-actions">
+                            <button class="reader-action-btn pulse" onclick="togglePulse(window._readerBookId, this)">
+                                ❤️ <span id="readerPulseCount">0</span> Pulse
+                            </button>
+                            <button class="reader-action-btn clone" onclick="handleCloneBook()">
+                                📋 Clone to My Projects
+                            </button>
+                            <button class="reader-action-btn edit" id="readerEditBtn" onclick="handleReaderEdit()" style="display:none;">
+                                ✏️ Edit Translation
+                            </button>
+                            <button class="reader-action-btn request" id="readerRequestBtn" onclick="handleRequestAccess()" style="display:none;">
+                                🔒 Request Edit Access
+                            </button>
+                            <button class="reader-action-btn suggest" onclick="openSuggestModal()">
+                                💡 Suggest Edit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUGGEST EDIT MODAL -->
+            <div class="login-overlay" id="suggestEditModal">
+                <div class="login-modal" style="width:550px;">
+                    <div class="login-header">
+                        <div class="login-title">💡 SUGGEST AN EDIT</div>
+                        <div class="login-close" onclick="closeSuggestModal()">×</div>
+                    </div>
+                    <div class="login-body">
+                        <div class="login-field">
+                            <label>PAGE</label>
+                            <input type="text" id="suggestPageRef" class="login-input" readonly>
+                        </div>
+                        <div class="login-field">
+                            <label>ORIGINAL TEXT (SELECT THE PART TO FIX)</label>
+                            <textarea id="suggestOriginal" class="login-input" placeholder="Paste the original translated text here..." style="height:80px; resize:none;"></textarea>
+                        </div>
+                        <div class="login-field">
+                            <label>YOUR SUGGESTED TRANSLATION</label>
+                            <textarea id="suggestNew" class="login-input" placeholder="Enter your improved translation..." style="height:80px; resize:none;"></textarea>
+                        </div>
+                        <div id="suggestError" style="color:#ef4444; font-size:11px; font-family:var(--font-mono); height:14px;"></div>
+                        <button class="login-action-btn" onclick="submitSuggestion()">SUBMIT SUGGESTION</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== -->
+            <!-- TAB: SOCIAL HUB          -->
+            <!-- ======================== -->
+            <div class="tab-page" id="tab-social">
+                <div class="page-content social-master-grid">
+                    
+                    <!-- Left Sidebar (Inbox & Friends) -->
+                    <div class="social-left-col">
+                        <div class="social-action-btn">
+                            <span class="social-btn-icon">➕</span> Add Friend
+                        </div>
+                        
+                        <div class="social-section">
+                            <div class="social-header">INBOX (DIRECT MESSAGES)</div>
+                            <div class="social-inbox-item active">
+                                <div class="inbox-avatar">T</div>
+                                <div class="inbox-info">
+                                    <div class="inbox-name">translator_pro</div>
+                                    <div class="inbox-preview">Thanks! Shared the book...</div>
+                                </div>
+                                <div class="inbox-unread">1</div>
+                            </div>
+                            <div class="social-inbox-item">
+                                <div class="inbox-avatar" style="background:var(--bg-panel); color:var(--text-white);">C</div>
+                                <div class="inbox-info">
+                                    <div class="inbox-name">Cipher_X</div>
+                                    <div class="inbox-preview">Can you help with page 45?</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="social-section" style="flex-grow:1; overflow-y:auto;">
+                            <div class="social-header">NETWORK NODES (FRIENDS)</div>
+                            <div class="social-friend" oncontextmenu="showFriendMenu(event, 'hebrew_scholar')"><span class="live-dot" style="margin-right:8px;"></span> hebrew_scholar</div>
+                            <div class="social-friend" oncontextmenu="showFriendMenu(event, 'dr_translate')"><span class="live-dot" style="margin-right:8px;"></span> dr_translate</div>
+                            <div class="social-friend offline" oncontextmenu="showFriendMenu(event, 'manga_fan_01')"><span class="live-dot" style="margin-right:8px; animation:none; opacity:0.3; background:var(--text-muted);"></span> manga_fan_01</div>
+                            <div class="social-friend offline" oncontextmenu="showFriendMenu(event, 'dostoevsky_fan')"><span class="live-dot" style="margin-right:8px; animation:none; opacity:0.3; background:var(--text-muted);"></span> dostoevsky_fan</div>
+                        </div>
+                    </div>
+
+                    <!-- Main Area (Tabs + Feed) -->
+                    <div class="social-main-col">
+                        <div class="social-tabs">
+                            <div class="social-tab active" onclick="switchSocialTab('activity', this)">[ ACTIVITY FEED ]</div>
+                            <div class="social-tab" onclick="switchSocialTab('forums', this)">[ FORUMS ]</div>
+                            <div class="social-tab" onclick="switchSocialTab('workspace', this)">[ COLLAB WORKSPACE ]</div>
+                        </div>
+                        
+                        <!-- Activity Feed View -->
+                        <div class="social-view active" id="social-activity">
+                            <div class="activity-card">
+                                <div class="activity-header">
+                                    <div class="activity-avatar">N</div>
+                                    <div class="activity-desc"><span style="color:var(--accent-green);">NetReaver</span> published a new translation</div>
+                                    <div class="activity-time">2h ago</div>
+                                </div>
+                                <div class="activity-body">
+                                    <div class="activity-book-card">
+                                        <div class="book-icon">📚</div>
+                                        <div class="book-info">
+                                            <div class="book-title">Russian Classics Vol. 1</div>
+                                            <div class="book-meta">RU → EN • 542 Pages</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="activity-card">
+                                <div class="activity-header">
+                                    <div class="activity-avatar" style="background:#ef4444;">E</div>
+                                    <div class="activity-desc"><span style="color:var(--accent-green);">Enigma_Zero</span> reached a milestone!</div>
+                                    <div class="activity-time">5h ago</div>
+                                </div>
+                                <div class="activity-body">
+                                    🎯 Translated over 10,000 pages this month using DeepL and Manual verification.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Forums View -->
+                        <div class="social-view" id="social-forums" style="display:none;">
+                            <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+                                <button class="footer-btn" style="width:auto; padding:8px 16px;">➕ NEW THREAD</button>
+                            </div>
+                            <div class="forum-thread">
+                                <div class="forum-stats">
+                                    <div class="forum-stat">▲ 42</div>
+                                    <div class="forum-stat" style="color:var(--text-muted);">💬 12</div>
+                                </div>
+                                <div class="forum-content">
+                                    <div class="forum-title">Best OCR settings for 19th Century German Fraktur?</div>
+                                    <div class="forum-meta">Posted by <span style="color:var(--accent-green);">historian_99</span> • Technical Help • 3 days ago</div>
+                                </div>
+                            </div>
+                            <div class="forum-thread">
+                                <div class="forum-stats">
+                                    <div class="forum-stat">▲ 156</div>
+                                    <div class="forum-stat" style="color:var(--text-muted);">💬 89</div>
+                                </div>
+                                <div class="forum-content">
+                                    <div class="forum-title">Megathread: Translating idiomatic expressions (Arabic to English)</div>
+                                    <div class="forum-meta">Posted by <span style="color:var(--accent-green);">dr_translate</span> • General Discussion • 1 week ago</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Workspace View -->
+                        <div class="social-view" id="social-workspace" style="display:none;">
+                            <div class="pr-card">
+                                <div class="pr-header">
+                                    <div class="pr-status open">OPEN</div>
+                                    <div class="pr-title">Review needed: Chapter 4 Medical terminology alignment</div>
+                                </div>
+                                <div class="pr-meta">#42 opened 2 days ago by <span style="color:var(--accent-green);">dr_translate</span> • 5 reviewers requested</div>
+                            </div>
+                            <div class="pr-card">
+                                <div class="pr-header">
+                                    <div class="pr-status merged">MERGED</div>
+                                    <div class="pr-title">Fix formatting on Torah Commentary Page 112</div>
+                                </div>
+                                <div class="pr-meta">#41 merged 5 days ago by <span style="color:var(--accent-green);">hebrew_scholar</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ======================== -->
+            <!-- TAB: PROFILE             -->
+            <!-- ======================== -->
+            <div class="tab-page" id="tab-profile">
+                <div class="page-content">
+                    <div class="page-title">👤 USER PROFILE</div>
+                    <div class="profile-header-area">
+                        <div class="profile-avatar-container">
+                            <div id="profileAvatarLarge" class="sidebar-avatar" style="width:80px; height:80px; font-size:32px;">U</div>
+                            <button class="avatar-edit-overlay" onclick="handleAvatarUpload()">📷 Update</button>
+                        </div>
+                        <div class="profile-main-info">
+                            <h2 id="profileDisplayName" style="margin:0; color:var(--accent-green);">TheGoyFather</h2>
+                            <p id="profileUserStatus" style="margin:5px 0 0 0; color:var(--text-muted); font-size:12px;">Active Member • Cloud Sync Enabled</p>
+                        </div>
+                    </div>
+
+                    <div class="settings-grid">
+                        <div class="settings-section">
+                            <div class="section-label">ACCOUNT DETAILS</div>
+                            <div class="setting-row"><span class="setting-name">Username</span><input id="profileViewUsername" class="setting-input" value="TheGoyFather" readonly></div>
+                            <div class="setting-row"><span class="setting-name">Email</span><input id="profileViewEmail" class="setting-input" value="user@example.com" readonly></div>
+                            <div class="setting-row"><span class="setting-name">Cloud Status</span><span id="profileCloudStatus" class="setting-value connected">● Connected</span></div>
+                        </div>
+                        <div class="settings-section">
+                            <div class="section-label">SUBSCRIPTION</div>
+                            <div class="setting-row"><span class="setting-name">Plan</span><span class="setting-value connected">PRO TIER</span></div>
+                            <div class="setting-row"><span class="setting-name">Cloud Storage</span><span class="setting-value">4.5 GB / 10 GB</span></div>
+                        </div>
+                        <div class="settings-section" style="margin-top: 20px;">
+                            <button class="logout-btn" onclick="handleLogout()">Log Out of TRANSLATOR_NET</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== -->
+            <!-- TAB: SETTINGS            -->
+            <!-- ======================== -->
+            <div class="tab-page" id="tab-settings">
+                <div class="page-content">
+                    <div class="page-title">⚙️ APP SETTINGS</div>
+                    <div class="settings-grid">
+                        <div class="settings-section">
+                            <div class="section-label">AI TRANSLATION ENGINES</div>
+                            <div class="setting-row"><span class="setting-name">Google Translate</span><span class="setting-value connected">● Active</span></div>
+                            <div class="setting-row"><span class="setting-name">DeepL API Key</span><input class="setting-input" type="password" placeholder="Enter API key..."></div>
+                            <div class="setting-row"><span class="setting-name">OpenAI GPT-4o</span><input class="setting-input" type="password" placeholder="Enter API key..."></div>
+                            <div class="setting-row"><span class="setting-name">Ollama (Local)</span><span class="setting-value disconnected">● Not Running</span></div>
+                        </div>
+                        <div class="settings-section">
+                            <div class="section-label">APPEARANCE</div>
+                            <div class="setting-row"><span class="setting-name">Theme</span><select class="footer-select"><option>Dark (Hacker Green)</option><option>Light</option></select></div>
+                            <div class="setting-row"><span class="setting-name">Font Size</span><input type="range" class="setting-slider" min="10" max="20" value="13"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- RIGHT-CLICK CONTEXT MENU -->
+    <div class="context-menu" id="contextMenu">
+        <button class="context-item" onclick="openQuickTranslateModal()">⚡ Send to Quick Translate</button>
+        <button class="context-item" onclick="closeContextMenu()">📋 Copy Text</button>
+        <button class="context-item" onclick="closeContextMenu()">🔍 Look Up in Dictionary</button>
+    </div>
+
+    <!-- QUICK TRANSLATE OVERLAY MODAL (for right-click from Translator) -->
+    <div class="qt-overlay" id="qtOverlay">
+        <div class="qt-modal">
+            <div class="qt-header">
+                <span class="qt-title">⚡ QUICK TRANSLATE // COMMAND CENTER</span>
+                <button class="qt-close" onclick="closeQuickTranslateModal()">✕ ESC</button>
+            </div>
+            <div class="qt-body">
+                <div class="qt-section">
+                    <div class="qt-section-header">TEXT TRANSLATE</div>
+                    <div class="qt-text-grid">
+                        <div class="qt-input-area">
+                            <label class="qt-label">INPUT [SOURCE]</label>
+                            <textarea class="qt-textarea" id="qtInput" placeholder="Paste or type text here..."></textarea>
+                        </div>
+                        <div class="qt-arrow-col">
+                            <button class="qt-translate-btn" title="Translate">▶</button>
+                        </div>
+                        <div class="qt-input-area">
+                            <label class="qt-label">OUTPUT [TARGET]</label>
+                            <textarea class="qt-textarea" id="qtOutput" placeholder="Translation will appear here..." readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="qt-section">
+                    <div class="qt-section-header">IMAGE TRANSLATE</div>
+                    <div class="qt-dropzone">
+                        <span class="qt-drop-icon">📷</span>
+                        <span>Drop an image here or click to browse</span>
+                        <span class="qt-drop-hint">(Supports PNG, JPG, BMP, TIFF)</span>
+            </div>
+
+    <!-- ============ LOGIN OVERLAY ============ -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-modal">
+            <div class="login-header">
+                <div class="login-title">TRANSLATOR_NET // SYSTEM AUTH</div>
+                <div class="login-close" onclick="closeLoginModal()">×</div>
+            </div>
+            <div class="login-tabs">
+                <div class="login-tab active" onclick="setLoginTab('login', this)">[ LOG IN ]</div>
+                <div class="login-tab" onclick="setLoginTab('signup', this)">[ SIGN UP ]</div>
+            </div>
+            
+            <div class="login-body" id="loginView">
+                <div id="loginError" style="color: #E74C3C; font-size: 11px; margin-bottom: 10px; font-family: var(--font-mono); height: 14px;"></div>
+                <div class="login-field">
+                    <label>EMAIL OR USERNAME</label>
+                    <input type="text" id="loginEmail" class="login-input" placeholder="sys_admin@network.local">
+                </div>
+                <div class="login-field">
+                    <label>PASSWORD</label>
+                    <input type="password" id="loginPass" class="login-input" placeholder="••••••••••••">
+                </div>
+                <button class="login-action-btn" onclick="handleLogin()">[ LOG IN ]</button>
+            </div>
+
+            <div class="login-body" id="signupView" style="display:none;">
+                <div id="signupError" style="color: #E74C3C; font-size: 11px; margin-bottom: 10px; font-family: var(--font-mono); height: 14px;"></div>
+                <div class="login-field">
+                    <label>EMAIL ADDRESS</label>
+                    <input type="text" id="regEmail" class="login-input" placeholder="new_node@network.local">
+                </div>
+                <div class="login-field">
+                    <label>USERNAME</label>
+                    <input type="text" id="regUser" class="login-input" placeholder="Node_77X">
+                </div>
+                <div class="login-field">
+                    <label>PASSWORD</label>
+                    <input type="password" id="regPass" class="login-input" placeholder="••••••••••••">
+                </div>
+                <button class="login-action-btn" onclick="handleRegister()">[ SIGN UP ]</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ AUTHOR PROFILE MODAL (NEURAL SIGNATURE) ============ -->
+    <div class="login-overlay" id="authorProfileModal">
+        <div class="login-modal" style="border-color:var(--accent-green); width:400px;">
+            <div class="login-header">
+                <div class="login-title">🕵️ NEURAL SIGNATURE</div>
+                <div class="login-close" onclick="closeAuthorProfile()">×</div>
+            </div>
+            <div class="login-body" id="authorProfileBody" style="align-items:center; text-align:center; padding:30px;">
+                <div class="status-msg">SCANNING NEURAL DATA...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ PROJECT EDIT MODAL ============ -->
+    <div class="login-overlay" id="projectEditModal">
+        <div class="login-modal">
+            <div class="login-header">
+                <div class="login-title">⚙️ PROJECT SETTINGS</div>
+                <div class="login-close" onclick="closeProjectEditModal()">×</div>
+            </div>
+            <div class="login-body">
+                <input type="hidden" id="editBookId">
+                <div class="login-field">
+                    <label>BOOK TITLE</label>
+                    <input type="text" id="editBookTitle" class="login-input" placeholder="Project Name">
+                </div>
+                <div class="login-field">
+                    <label>CATEGORY</label>
+                    <select id="editBookCategory" class="login-input" onchange="handleCategoryChange(this.value)" style="background:var(--bg-panel); color:var(--text-white); border:1px solid var(--border-dim); width:100%; box-sizing:border-box;">
+                        <!-- Dynamically populated from Library Folders -->
+                    </select>
+                    <input type="text" id="editBookNewCategory" class="login-input" placeholder="ENTER NEW CATEGORY NAME..." style="display:none; margin-top:10px; border-color:var(--accent-green); text-transform:uppercase;">
+                </div>
+                <div class="login-field">
+                    <label>DESCRIPTION</label>
+                    <textarea id="editBookDescription" class="login-input" placeholder="WHAT IS THIS KNOWLEDGE ABOUT?" style="background:var(--bg-panel); color:var(--text-white); border:1px solid var(--border-dim); width:100%; box-sizing:border-box; height:80px; resize:none; font-family:var(--font-mono); font-size:12px; padding:10px;"></textarea>
+                </div>
+                <div class="login-field">
+                    <label>TAGS (COMMA SEPARATED)</label>
+                    <input type="text" id="editBookTags" class="login-input" placeholder="E.G. ANCIENT, MEDICAL, RARE" style="text-transform:uppercase;">
+                </div>
+                <div class="login-field" style="flex-direction:row; justify-content:space-between; align-items:center; display:flex; margin-top:10px;">
+                    <label style="margin-bottom:0">PUBLIC ON GLOBAL LIBRARY</label>
+                    <input type="checkbox" id="editBookPublic" style="width:20px; height:20px; accent-color:var(--accent-green);">
+                </div>
+                <div class="login-field" style="flex-direction:row; justify-content:space-between; align-items:center; display:flex; margin-top:10px;">
+                    <label style="margin-bottom:0">READ-ONLY (NO CLONING/EDITING BY OTHERS)</label>
+                    <input type="checkbox" id="editBookReadOnly" style="width:20px; height:20px; accent-color:var(--accent-green);">
+                </div>
+                
+                <div id="editError" style="color:#ef4444; font-size:11px; margin-top:10px; font-family:var(--font-mono); height:14px;"></div>
+                
+                <button class="login-action-btn" onclick="saveProjectChanges()">SAVE CHANGES</button>
+                <button class="login-action-btn" style="background:#ef444466; margin-top:10px; border-color:#ef4444; color:#fff;" onclick="confirmDeleteProject()">DELETE PROJECT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ PUBLISH TO CLOUD MODAL ============ -->
+    <div class="login-overlay" id="publishModal">
+        <div class="login-modal">
+            <div class="login-header">
+                <div class="login-title">🚀 PUBLISH TO CLOUD</div>
+                <div class="login-close" onclick="closePublishModal()">×</div>
+            </div>
+            <div class="login-body">
+                <div class="login-field">
+                    <label>BOOK TITLE</label>
+                    <input type="text" id="publishTitle" class="login-input" placeholder="Enter a title for your translation">
+                </div>
+                <div class="login-field">
+                    <label>CATEGORY</label>
+                    <input type="text" id="publishCategory" class="login-input" placeholder="E.G. RELIGIOUS, ACADEMIC, FICTION" style="text-transform:uppercase;">
+                </div>
+                <div class="login-field">
+                    <label>DESCRIPTION</label>
+                    <textarea id="publishDescription" class="login-input" placeholder="Describe this translation..." style="background:var(--bg-panel); color:var(--text-white); border:1px solid var(--border-dim); width:100%; box-sizing:border-box; height:80px; resize:none; font-family:var(--font-mono); font-size:12px; padding:10px;"></textarea>
+                </div>
+                <div class="login-field">
+                    <label>TAGS (COMMA SEPARATED)</label>
+                    <input type="text" id="publishTags" class="login-input" placeholder="E.G. ANCIENT, MEDICAL, RARE" style="text-transform:uppercase;">
+                </div>
+                <div class="login-field" style="flex-direction:row; justify-content:space-between; align-items:center; display:flex; margin-top:10px;">
+                    <label style="margin-bottom:0">PUBLIC ON GLOBAL LIBRARY</label>
+                    <input type="checkbox" id="publishPublic" checked style="width:20px; height:20px; accent-color:var(--accent-green);">
+                </div>
+                <div class="login-field" style="flex-direction:row; justify-content:space-between; align-items:center; display:flex; margin-top:10px;">
+                    <label style="margin-bottom:0">READ-ONLY (NO CLONING/EDITING)</label>
+                    <input type="checkbox" id="publishReadOnly" style="width:20px; height:20px; accent-color:var(--accent-green);">
+                </div>
+                <div id="publishError" style="color:#ef4444; font-size:11px; margin-top:10px; font-family:var(--font-mono); height:14px;"></div>
+                <button class="login-action-btn" id="publishSubmitBtn" onclick="submitPublish()">🚀 PUBLISH</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // === TAB SWITCHING ===
+        // --- LIBRARY & PROJECTS API ---
+
+        let isFetchingProjects = false;
+        async function refreshUserProjects() {
+            if (isFetchingProjects) return;
+            isFetchingProjects = true;
+
+            const list = document.getElementById('projectsList');
+            const pubList = document.getElementById('publishedList');
+            if (!list) return;
+
+            try {
+                const res = await eel.fetch_user_projects()();
+                if (res.success) {
+                    window.allProjects = res.projects; // Store globally for easy access
+                    list.innerHTML = ''; // In-progress (Future translations)
+                    pubList.innerHTML = ''; // Your Archives (Finished/Private/Public)
+                    
+                    if (res.projects.length === 0) {
+                        list.innerHTML = '<div class="status-msg">No local projects found. Start a new translation to see it here!</div>';
+                    }
+
+                    const grid = document.createElement('div');
+                    grid.className = 'library-grid';
+                    
+                    res.projects.forEach(book => {
+                        const card = document.createElement('div');
+                        card.className = 'library-card';
+                        card.onclick = () => openProjectInTranslator(book);
+                        
+                        // Calculated Metrics
+                        const readTime = Math.max(2, (book.total_pages || 1) * 2);
+                        const tags = (book.tags || '').split(',').map(t => t.trim()).filter(t => t);
+                        const likes = book.likes || 0;
+                        const hasGlow = likes >= 10;
+                        const isFlaming = likes >= 50;
+
+                        const icon = ['📕','📗','📘','📙','📓','📔'][Math.floor(Math.random() * 6)];
+                        
+                        card.innerHTML = `
+                            <div class="lib-cover ${hasGlow ? 'resonance-glow' : ''}" style="position:relative;">
+                                <div class="lib-icon">${icon}</div>
+                                <div class="lib-description-overlay">${book.description || 'NO NEURAL DESCRIPTION PROVIDED.'}</div>
+                                <div class="lib-read-time" style="font-size:12px; padding:6px 12px; font-weight:700;">⏱️ ~${readTime}m Cycle</div>
+                            </div>
+                            <div class="lib-info" style="position:relative;">
+                                <span class="lib-title" style="font-size:18px; margin-bottom:6px;">${book.title}</span>
+                                <span class="lib-author" style="color:var(--accent-green); font-size:13px;">${book.is_public ? 'Public ✅' : 'Private 🔒'}</span>
+                                
+                                <div class="lib-tags" style="margin-top:8px; height:24px; overflow:hidden;">
+                                    ${tags.map(t => `<span style="font-size:10px; background:var(--bg-pane); padding:2px 6px; border-radius:3px; margin-right:4px; border:1px solid var(--border-dim);">#${t}</span>`).join('')}
+                                </div>
+
+                                <div class="lib-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+                                    <button onclick="event.stopPropagation(); openProjectEditModal('${book.id}')" style="background:transparent; border:1px solid var(--border-dim); border-radius:20px; padding:6px 15px; color:var(--text-muted); cursor:pointer; font-family:var(--font-mono); font-size:11px; transition:0.3s;">⚙️ EDIT</button>
+                                    <div style="font-size:14px; font-family:var(--font-mono); font-weight:700; color:var(--text-white);">❤️ ${likes}</div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        grid.appendChild(card);
+                    });
+                    
+                    pubList.appendChild(grid);
+                }
+            } catch (err) {
+                console.error("Failed to fetch projects:", err);
+            } finally {
+                isFetchingProjects = false;
+            }
+        }
+
+        let isFetchingLibrary = false;
+        async function refreshGlobalLibrary() {
+            if (isFetchingLibrary) return;
+            isFetchingLibrary = true;
+
+            const container = document.getElementById('libraryContainer');
+            if (!container) return;
+
+            const searchTerm = document.getElementById('librarySearchInput') ? document.getElementById('librarySearchInput').value.toLowerCase() : '';
+
+            try {
+                const res = await eel.fetch_global_library()();
+                if (res.success) {
+                    container.innerHTML = '';
+                    
+                    const categories = Object.keys(res.library).sort();
+                    syncCategoryDropdown(categories); // Keep Edit Modal in sync
+                    let totalMatches = 0;
+
+                    categories.forEach(cat => {
+                        // Filter books in this category
+                        const matchingBooks = res.library[cat].filter(book => {
+                            if (!searchTerm) return true;
+                            return book.title.toLowerCase().includes(searchTerm) || 
+                                   (book.owner_username && book.owner_username.toLowerCase().includes(searchTerm)) ||
+                                   (book.language && book.language.toLowerCase().includes(searchTerm));
+                        });
+
+                        if (matchingBooks.length === 0 && searchTerm && !cat.toLowerCase().includes(searchTerm)) {
+                            return; // Skip category if no books match AND category name doesn't match
+                        }
+
+                        totalMatches += matchingBooks.length;
+
+                        const details = document.createElement('details');
+                        details.className = 'library-accordion';
+                        if (searchTerm) details.open = true; // Auto-expand if searching
+
+                        const summary = document.createElement('summary');
+                        summary.className = 'category-header';
+                        summary.innerHTML = `<span>📂 ${cat.toUpperCase()}</span> <span class="badge">${matchingBooks.length}</span>`;
+                        details.appendChild(summary);
+                        
+                        const grid = document.createElement('div');
+                        grid.className = 'library-grid';
+                        
+                        matchingBooks.forEach(book => {
+                            const card = document.createElement('div');
+                            card.className = 'library-card';
+                            card.onclick = () => openLibraryReader(book);
+                            
+                            // Calculated Metrics
+                            const readTime = Math.max(2, (book.total_pages || 1) * 2);
+                            const tags = (book.tags || '').split(',').map(t => t.trim()).filter(t => t);
+                            const likes = book.likes || 0;
+                            const hasGlow = likes >= 10;
+                            const isFlaming = likes >= 50;
+
+                            const icon = ['📕','📗','📘','📙','📓','📔'][Math.floor(Math.random() * 6)];
+                            
+                            card.innerHTML = `
+                                <div class="lib-cover ${hasGlow ? 'resonance-glow' : ''}" style="position:relative;">
+                                    <div class="lib-icon">${icon}</div>
+                                    <div class="lib-description-overlay">${book.description || 'NO NEURAL DESCRIPTION PROVIDED.'}</div>
+                                    <div class="lib-read-time" style="font-size:12px; padding:6px 12px; font-weight:700;">⏱️ ~${readTime}m Cycle</div>
+                                </div>
+                                <div class="lib-info" style="position:relative;">
+                                    <span class="lib-title" style="font-size:18px; margin-bottom:6px;">${book.title}</span>
+                                    <span class="lib-author" onclick="openNeuralSignature('${book.owner_id}')" style="cursor:pointer; color:var(--accent-green); text-decoration:underline; font-size:13px;">by ${book.owner_username || 'Architect'}</span>
+                                    
+                                    <div class="lib-tags" style="margin-top:8px; height:24px; overflow:hidden;">
+                                        ${tags.map(t => `<span style="font-size:10px; background:var(--bg-pane); padding:2px 6px; border-radius:3px; margin-right:4px; border:1px solid var(--border-dim);">#${t}</span>`).join('')}
+                                    </div>
+
+                                    <div class="lib-footer" style="display:flex; justify-content:flex-end; align-items:center; margin-top:15px;">
+                                        <button class="pulse-btn ${isFlaming ? 'flaming-pulse' : ''}" onclick="event.stopPropagation(); togglePulse('${book.id}', this)" style="background:var(--bg-panel); border:1px solid var(--border-dim); border-radius:20px; padding:6px 15px; color:var(--text-white); cursor:pointer; font-size:18px; transition:0.3s; display:flex; align-items:center; gap:8px; box-shadow:0 2px 10px rgba(0,0,0,0.3);">
+                                            ❤️ <span id="pulse-count-${book.id}" style="font-size:14px; font-family:var(--font-mono); font-weight:700;">${likes}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                            grid.appendChild(card);
+                        });
+                        
+                        details.appendChild(grid);
+                        container.appendChild(details);
+                    });
+
+                    if (totalMatches === 0 && searchTerm) {
+                        container.innerHTML = '<div class="status-msg">No archives match your search criteria. Try a broader term.</div>';
+                    } else if (categories.length === 0) {
+                        container.innerHTML = '<div class="status-msg">The library is empty. Be the first to publish a book!</div>';
+                    }
+                } else {
+                    throw new Error(res.error || "Unknown Server Error");
+                }
+            } catch (err) {
+                console.error("Failed to fetch library:", err);
+                container.innerHTML = `
+                    <div class="status-msg error">
+                        Archive connection lost (${err.message}).
+                        <br><br>
+                        <button class="footer-btn" style="width:auto; padding:8px 16px;" onclick="isFetchingLibrary=false; refreshGlobalLibrary()">[ RE-SYNC ARCHIVES ]</button>
+                    </div>
+                `;
+            } finally {
+                isFetchingLibrary = false;
+            }
+        }
+
+        function syncCategoryDropdown(categories) {
+            const select = document.getElementById('editBookCategory');
+            if (!select) return;
+            
+            // Only use categories that actually exist as folders
+            const allCats = new Set(categories.map(c => c.toUpperCase()));
+            
+            const currentVal = select.value;
+            select.innerHTML = '';
+            
+            // If the list is empty, add a placeholder or let it be empty as requested
+            Array.from(allCats).sort().forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                select.appendChild(opt);
+            });
+            
+            // Add "Create New" option at the end
+            const addNew = document.createElement('option');
+            addNew.value = "__NEW__";
+            addNew.textContent = "+ ADD NEW CATEGORY";
+            select.appendChild(addNew);
+            
+            if (currentVal) select.value = currentVal;
+        }
+
+        function handleCategoryChange(val) {
+            const input = document.getElementById('editBookNewCategory');
+            if (val === "__NEW__") {
+                input.style.display = 'block';
+                input.focus();
+            } else {
+                input.style.display = 'none';
+            }
+        }
+
+        let searchDebounce;
+        function handleLibrarySearch(val) {
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(() => {
+                refreshGlobalLibrary();
+            }, 300);
+        }
+
+        function switchTab(tabId, btn) {
+            console.log("Switching to tab: " + tabId);
+            document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar-icon').forEach(i => i.classList.remove('active'));
+            
+            const target = document.getElementById('tab-' + tabId);
+            if (target) {
+                target.classList.add('active');
+                if (btn) btn.classList.add('active');
+
+                // Trigger refreshes for specific tabs
+                if (tabId === 'projects') refreshUserProjects();
+                if (tabId === 'library') refreshGlobalLibrary();
+            }
+        }
+
+        // === RIGHT-CLICK CONTEXT MENU ===
+        const contextMenu = document.getElementById('contextMenu');
+        document.querySelectorAll('.code-area').forEach(area => {
+            area.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = e.pageX + 'px';
+                contextMenu.style.top = e.pageY + 'px';
+            });
+        });
+        document.addEventListener('click', () => { contextMenu.style.display = 'none'; });
+        function closeContextMenu() { contextMenu.style.display = 'none'; }
+
+        // === QUICK TRANSLATE OVERLAY (Modal from right-click) ===
+        const qtOverlay = document.getElementById('qtOverlay');
+        function openQuickTranslateModal() {
+            closeContextMenu();
+            const selected = window.getSelection().toString();
+            if (selected) document.getElementById('qtInput').value = selected;
+            qtOverlay.classList.add('active');
+        }
+        function closeQuickTranslateModal() { qtOverlay.classList.remove('active'); }
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeQuickTranslateModal(); });
+        qtOverlay.addEventListener('click', (e) => { if (e.target === qtOverlay) closeQuickTranslateModal(); });
+
+        // === QUICK TRANSLATE TAB MODE TOGGLE ===
+        function setQTMode(mode, btn) {
+            document.getElementById('qt-mode-text').style.display = mode === 'text' ? 'flex' : 'none';
+            document.getElementById('qt-mode-image').style.display = mode === 'image' ? 'flex' : 'none';
+            document.querySelectorAll('.qt-mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // === TRANSLATOR STATE SWITCHING ===
+        let translationRunning = false;
+
+        function simulatePDFLoad() {
+            // Transition from drop zone to workspace
+            document.getElementById('translator-dropzone-state').style.display = 'none';
+            document.getElementById('translator-workspace').style.display = 'flex';
+            // Reset translation state
+            translationRunning = false;
+            const btn = document.getElementById('translator-start-btn');
+            btn.textContent = '▶ START';
+            btn.classList.remove('paused');
+            document.getElementById('translator-progress-label').textContent = 'Ready — Press START to begin translation';
+            document.getElementById('translator-progress-fill').style.width = '0%';
+        }
+
+        function clearTranslator() {
+            // Stop any running translation and reset to drop zone
+            translationRunning = false;
+            document.getElementById('translator-workspace').style.display = 'none';
+            document.getElementById('translator-dropzone-state').style.display = 'flex';
+        }
+
+        function toggleTranslation() {
+            const btn = document.getElementById('translator-start-btn');
+            const label = document.getElementById('translator-progress-label');
+            const fill = document.getElementById('translator-progress-fill');
+            if (!translationRunning) {
+                // Start
+                translationRunning = true;
+                btn.textContent = '⏸ PAUSE';
+                btn.classList.add('paused');
+                label.textContent = 'Processing... 65% complete (Page 14/23)';
+                fill.style.width = '65%';
+            } else {
+                // Pause
+                translationRunning = false;
+                btn.textContent = '▶ RESUME';
+                btn.classList.remove('paused');
+                label.textContent = 'Paused — Press RESUME to continue';
+            }
+        }
+
+        // === LOGIN MODAL ===
+        function openLoginModal() {
+            document.getElementById('loginOverlay').classList.add('active');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginOverlay').classList.remove('active');
+        }
+
+        function setLoginTab(tabType, element) {
+            // Update active tab styling
+            const tabs = document.querySelectorAll('.login-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+
+            // Show correct view
+            if (tabType === 'login') {
+                document.getElementById('loginView').style.display = 'flex';
+                document.getElementById('signupView').style.display = 'none';
+            } else {
+                document.getElementById('signupView').style.display = 'flex';
+                document.getElementById('loginView').style.display = 'none';
+            }
+        }
+
+        let _isLoggedIn = false;
+        let _pendingBookToRead = null;
+
+        function updateAuthUI(user) {
+            _isLoggedIn = !!user;
+            const profileBtn = document.getElementById('sidebarProfileBtn');
+            const dashName = document.querySelector('.dash-username');
+            const pUsername = document.getElementById('profileViewUsername');
+            const pEmail = document.getElementById('profileViewEmail');
+            const pStatus = document.getElementById('profileCloudStatus');
+
+            if (user) {
+                // LOGGED IN
+                console.log("Updating UI for user:", user);
+                if (user.avatar_url) {
+                    profileBtn.innerHTML = `<div class="sidebar-avatar" style="background-image: url('${user.avatar_url}'); background-size: cover;"></div><span>Profile</span>`;
+                } else {
+                    const initial = user.username ? user.username.charAt(0).toUpperCase() : 'U';
+                    profileBtn.innerHTML = `<div class="sidebar-avatar">${initial}</div><span>Profile</span>`;
+                }
+                profileBtn.setAttribute('data-tab', 'profile');
+                profileBtn.onclick = function() { switchTab('profile', this); };
+                
+                if (dashName) dashName.textContent = user.username || 'User';
+                
+                // Update Profile Tab Fields
+                if (pUsername) pUsername.value = user.username || 'User';
+                if (pEmail) pEmail.value = user.email || '';
+                
+                const pLargeAvatar = document.getElementById('profileAvatarLarge');
+                if (pLargeAvatar) {
+                    if (user.avatar_url) {
+                        pLargeAvatar.innerHTML = '';
+                        pLargeAvatar.style.backgroundImage = `url('${user.avatar_url}')`;
+                        pLargeAvatar.style.backgroundSize = 'cover';
+                    } else {
+                        const initial = user.username ? user.username.charAt(0).toUpperCase() : 'U';
+                        pLargeAvatar.innerHTML = initial;
+                        pLargeAvatar.style.backgroundImage = 'none';
+                    }
+                }
+
+                if (pStatus) {
+                    pStatus.textContent = "● Connected";
+                    pStatus.className = "setting-value connected";
+                }
+            } else {
+                // LOGGED OUT
+                console.log("Updating UI for logout");
+                profileBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Log In</span>';
+                profileBtn.removeAttribute('data-tab');
+                profileBtn.onclick = function() { openLoginModal(); };
+                
+                if (dashName) dashName.textContent = 'Translator';
+                
+                // Reset Profile Tab Fields
+                if (pUsername) pUsername.value = "Guest";
+                if (pEmail) pEmail.value = "Not Logged In";
+                if (pStatus) {
+                    pStatus.textContent = "● Offline";
+                    pStatus.className = "setting-value disconnected";
+                }
+                
+                switchTab('dashboard', document.querySelector('[data-tab=dashboard]'));
+            }
+
+            // Sync User Projects UI
+            refreshUserProjects();
+
+            // Auto-open pending book if they just logged in
+            if (user && _pendingBookToRead) {
+                const b = _pendingBookToRead;
+                _pendingBookToRead = null;
+                setTimeout(() => openLibraryReader(b), 300);
+            }
+        }
+
+        async function handleAvatarUpload() {
+            console.log("handleAvatarUpload triggered");
+            try {
+                const res = await eel.upload_avatar()();
+                if (res.success) {
+                    // Update current user state and UI
+                    const avatar_url = res.avatar_url;
+                    
+                    // Force refresh everywhere
+                    const profileBtn = document.getElementById('sidebarProfileBtn');
+                    const sidebarAvatar = profileBtn.querySelector('.sidebar-avatar');
+                    if (sidebarAvatar) {
+                        sidebarAvatar.style.backgroundImage = `url('${avatar_url}?t=${Date.now()}')`;
+                        sidebarAvatar.style.backgroundSize = 'cover';
+                        sidebarAvatar.innerHTML = '';
+                    }
+
+                    const pLargeAvatar = document.getElementById('profileAvatarLarge');
+                    if (pLargeAvatar) {
+                        pLargeAvatar.style.backgroundImage = `url('${avatar_url}?t=${Date.now()}')`;
+                        pLargeAvatar.style.backgroundSize = 'cover';
+                        pLargeAvatar.innerHTML = '';
+                    }
+                } else if (!res.cancelled) {
+                    alert("Upload failed: " + res.error);
+                }
+            } catch (err) {
+                console.error("Avatar upload failed:", err);
+            }
+        }
+
+        async function handleLogin() {
+            console.log("handleLogin triggered");
+            const loginId = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPass').value;
+            const errorLbl = document.getElementById('loginError');
+            
+            if (!loginId || !pass) {
+                errorLbl.textContent = "Please fill all fields";
+                return;
+            }
+
+            errorLbl.textContent = "Connecting...";
+            console.log("Calling eel.login for: " + loginId);
+            try {
+                const res = await eel.login(loginId, pass)();
+                console.log("eel.login response:", res);
+                
+                if (res.success) {
+                    updateAuthUI(res.user);
+                    closeLoginModal();
+                    switchTab('profile', document.getElementById('sidebarProfileBtn'));
+                } else {
+                    errorLbl.textContent = res.error || "Login failed";
+                }
+            } catch (err) {
+                console.error("Eel call failed:", err);
+                errorLbl.textContent = "System Connection Error";
+            }
+        }
+
+        async function handleLogout() {
+            await eel.logout()();
+            updateAuthUI(null);
+        }
+
+        async function handleRegister() {
+            const user = document.getElementById('regUser').value;
+            const email = document.getElementById('regEmail').value;
+            const pass = document.getElementById('regPass').value;
+            const errorLbl = document.getElementById('signupError');
+            
+            if (!user || !email || !pass) {
+                errorLbl.textContent = "Please fill all fields";
+                return;
+            }
+
+            errorLbl.textContent = "Creating account...";
+            const res = await eel.register(user, email, pass)();
+            
+            if (res.success) {
+                updateAuthUI(res.user);
+                closeLoginModal();
+                switchTab('profile', document.getElementById('sidebarProfileBtn'));
+            } else {
+                errorLbl.textContent = res.error || "Signup failed";
+            }
+        }
+
+        async function initAuth() {
+            const session = await eel.check_session()();
+            if (session && session.logged_in) {
+                updateAuthUI(session);
+            } else {
+                updateAuthUI(null);
+            }
+            syncCategoryDropdown([]); // Ensure "Create New" is available immediately
+        }
+
+        window.addEventListener('load', initAuth);
+
+        // --- PROJECT MANAGEMENT ---
+        function openProjectEditModal(id) {
+            const book = window.allProjects.find(p => p.id === id);
+            if (!book) return;
+
+            document.getElementById('editBookId').value = id;
+            document.getElementById('editBookTitle').value = book.title;
+            
+            // Ensure the book's CURRENT category is in the dropdown even if it's not a folder yet
+            const select = document.getElementById('editBookCategory');
+            const cat = (book.category || 'GENERAL').toUpperCase();
+            let exists = false;
+            for (let i=0; i<select.options.length; i++) {
+                if (select.options[i].value === cat) { exists = true; break; }
+            }
+            if (!exists) {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                select.appendChild(opt);
+            }
+            select.value = cat;
+            
+            // Reset "New Category" input
+            document.getElementById('editBookNewCategory').style.display = 'none';
+            document.getElementById('editBookNewCategory').value = '';
+            
+            const isPublic = (book.is_public === true || book.is_public === 1 || book.is_public === 'true');
+            const isReadOnly = (book.is_read_only === true || book.is_read_only === 1 || book.is_read_only === 'true');
+            document.getElementById('editBookPublic').checked = isPublic;
+            document.getElementById('editBookReadOnly').checked = isReadOnly;
+            
+            document.getElementById('editBookDescription').value = book.description || '';
+            document.getElementById('editBookTags').value = (book.tags || '').toUpperCase();
+            
+            document.getElementById('editError').textContent = '';
+            document.getElementById('projectEditModal').classList.add('active');
+        }
+
+        function closeProjectEditModal() {
+            document.getElementById('projectEditModal').classList.remove('active');
+        }
+
+        async function saveProjectChanges() {
+            const id = document.getElementById('editBookId').value;
+            const title = document.getElementById('editBookTitle').value;
+            
+            let cat = document.getElementById('editBookCategory').value;
+            if (cat === "__NEW__") {
+                cat = document.getElementById('editBookNewCategory').value.trim().toUpperCase();
+                if (!cat) {
+                    document.getElementById('editError').textContent = "Please enter a name for the new category";
+                    return;
+                }
+            }
+            
+            const desc = document.getElementById('editBookDescription').value;
+            const tags = document.getElementById('editBookTags').value.trim().toUpperCase();
+            const isPub = document.getElementById('editBookPublic').checked;
+            const isRO = document.getElementById('editBookReadOnly').checked;
+            
+            const btn = document.querySelector('#projectEditModal .login-action-btn');
+            btn.textContent = "SAVING...";
+            btn.disabled = true;
+
+            try {
+                const res = await eel.update_book_metadata(id, {
+                    title: title,
+                    category: cat,
+                    description: desc,
+                    tags: tags,
+                    is_public: isPub,
+                    is_read_only: isRO
+                })();
+
+                if (res.success) {
+                    console.log("Metadata updated successfully");
+                    closeProjectEditModal();
+                    await refreshUserProjects();
+                    if (isFetchingLibrary === false) await refreshGlobalLibrary(); 
+                } else {
+                    document.getElementById('editError').textContent = res.error || "Update failed";
+                }
+            } catch (err) {
+                console.error("Save failed:", err);
+                document.getElementById('editError').textContent = "Connection Error";
+            }
+            btn.textContent = "SAVE CHANGES";
+            btn.disabled = false;
+        }
+
+        async function confirmDeleteProject() {
+            const id = document.getElementById('editBookId').value;
+            if (confirm("Permanently delete this project? This cannot be undone.")) {
+                const res = await eel.delete_book(id)();
+                if (res.success) {
+                    closeProjectEditModal();
+                    await refreshUserProjects();
+                    if (isFetchingLibrary === false) await refreshGlobalLibrary();
+                } else {
+                    alert("Delete failed: " + res.error);
+                }
+            }
+        }
+
+        // --- SOCIAL & INTERACTION ---
+        let pulseCooldowns = {};
+        async function togglePulse(bookId, btn) {
+            // Rate limiting (Neural Cooldown)
+            const now = Date.now();
+            if (pulseCooldowns[bookId] && now - pulseCooldowns[bookId] < 500) return;
+            pulseCooldowns[bookId] = now;
+
+            // Optimistic UI (Instant Feedback)
+            const countEl = document.getElementById(`pulse-count-${bookId}`);
+            if (countEl) {
+                const current = parseInt(countEl.innerText) || 0;
+                countEl.innerText = current + 1;
+                
+                // Add a small scale animation for feedback
+                btn.style.transform = 'scale(1.4)';
+                setTimeout(() => btn.style.transform = 'scale(1)', 200);
+            }
+
+            try {
+                const res = await eel.toggle_like(bookId)();
+                if (!res.success) {
+                    console.error("Pulse sync failed:", res.error);
+                    // Rollback if failed (silent or show error)
+                }
+            } catch (err) {
+                console.error("Pulse connection lost.");
+            }
+        }
+
+        async function openNeuralSignature(userId) {
+            const modal = document.getElementById('authorProfileModal');
+            const body = document.getElementById('authorProfileBody');
+            modal.classList.add('active');
+            body.innerHTML = '<div class="status-msg">DECRYPTING SIGNATURE...</div>';
+            
+            const res = await eel.fetch_author_stats(userId)();
+            if (res.success) {
+                body.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="sidebar-avatar" style="width:64px; height:64px; font-size:32px; margin-bottom:15px; border:2px solid var(--accent-green); background:none; color:var(--accent-green); display:flex; align-items:center; justify-content:center; border-radius:50%;">
+                            ${res.username[0].toUpperCase()}
+                        </div>
+                        <div style="font-family:var(--font-mono); color:var(--accent-green); font-weight:700; font-size:18px; margin-bottom:5px;">${res.username.toUpperCase()}</div>
+                        <div style="font-size:11px; color:var(--text-dim); margin-bottom:20px; font-family:var(--font-mono); line-height:1.4;">${res.bio.toUpperCase()}</div>
+                        
+                        <div style="display:flex; gap:30px; justify-content:center; width:100%; border-top:1px solid var(--border-dim); padding-top:20px;">
+                            <div style="text-align:center;">
+                                <div style="font-size:24px; color:var(--text-white); font-weight:700; font-family:var(--font-mono);">${res.stats.contributions}</div>
+                                <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Harvests</div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="font-size:24px; color:var(--accent-green); font-weight:700; font-family:var(--font-mono);">${res.stats.reputation}</div>
+                                <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Resonance</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                body.innerHTML = `<div class="status-msg error">${res.error}</div>`;
+            }
+        }
+
+        function closeAuthorProfile() {
+            document.getElementById('authorProfileModal').classList.remove('active');
+        }
+        function toggleNotifDropdown() {
+            const dropdown = document.getElementById('notifDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function openSocialHub() {
+            // Close dropdown
+            document.getElementById('notifDropdown').style.display = 'none';
+            // Switch to social tab
+            const socialBtn = document.querySelector('[data-tab=social]');
+            if (socialBtn) switchTab('social', socialBtn);
+        }
+
+        // === SOCIAL HUB TABS ===
+        function switchSocialTab(viewId, element) {
+            // Update active tab styling
+            const tabs = document.querySelectorAll('.social-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+
+            // Hide all views
+            document.querySelectorAll('.social-view').forEach(v => v.style.display = 'none');
+            
+            // Show targeted view
+            const target = document.getElementById('social-' + viewId);
+            if (target) target.style.display = 'flex';
+        }
+
+        // === FRIEND CONTEXT MENU ===
+        let currentFriendContext = "";
+        
+        function showFriendMenu(e, username) {
+            e.preventDefault();
+            currentFriendContext = username;
+            
+            const menu = document.getElementById('friendContextMenu');
+            menu.style.display = 'flex';
+            
+            // Basic placement near mouse
+            let x = e.clientX;
+            let y = e.clientY;
+            
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+            
+            // Close if clicking outside
+            document.addEventListener('click', hideFriendMenuOnClickOutside);
+        }
+
+        function closeFriendMenu() {
+            document.getElementById('friendContextMenu').style.display = 'none';
+        }
+
+        function hideFriendMenuOnClickOutside(e) {
+            const menu = document.getElementById('friendContextMenu');
+            if (!menu.contains(e.target)) {
+                closeFriendMenu();
+                document.removeEventListener('click', hideFriendMenuOnClickOutside);
+            }
+        }
+
+        // === PUBLIC PROFILE MODAL ===
+        function openPublicProfile() {
+            closeFriendMenu();
+            const modal = document.getElementById('publicProfileModal');
+            
+            // Dynamically set username based on context
+            if (currentFriendContext) {
+                document.getElementById('profileUsername').innerText = currentFriendContext;
+                document.getElementById('profileAvatar').innerText = currentFriendContext.charAt(0).toUpperCase();
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function closePublicProfile() {
+            document.getElementById('publicProfileModal').style.display = 'none';
+        }
+
+        // ========================================
+        // LIBRARY IN-PLACE READER
+        // ========================================
+        window._readerBookId = null;
+        window._readerBookData = null;
+        window._readerPage = 0;
+        window._readerTotalPages = 0;
+        window._readerCanEdit = false;
+        window._readerImagePaneVisible = true;
+
+        function toggleReaderImagePane() {
+            const pane = document.getElementById('readerImagePane');
+            const btn = document.getElementById('toggleImagePaneBtn');
+            window._readerImagePaneVisible = !window._readerImagePaneVisible;
+            if (window._readerImagePaneVisible) {
+                pane.style.display = 'flex';
+                btn.style.borderColor = 'var(--border-green)';
+                btn.style.color = 'var(--text-green)';
+            } else {
+                pane.style.display = 'none';
+                btn.style.borderColor = 'var(--border-dim)';
+                btn.style.color = 'var(--text-muted)';
+            }
+        }
+
+        async function openLibraryReader(book) {
+            if (!_isLoggedIn) {
+                _pendingBookToRead = book;
+                openLoginModal();
+                return;
+            }
+
+            // Store book data
+            window._readerBookId = book.id;
+            window._readerBookData = book;
+            window._readerPage = 0;
+
+            // Update toolbar info
+            document.getElementById('readerBookTitle').textContent = book.title || 'Untitled';
+            document.getElementById('readerBookAuthor').textContent = `by @${book.owner_username || 'Unknown'}`;
+            document.getElementById('readerPulseCount').textContent = book.likes || 0;
+
+            // Parse language info
+            const lang = book.language || '';
+            const langParts = lang.split('→').map(l => l.trim());
+            document.getElementById('readerOrigLang').textContent = `[${langParts[0] || 'Source'}]`;
+            document.getElementById('readerTransLang').textContent = `[${langParts[1] || 'Target'}]`;
+
+            // Check permissions
+            try {
+                const detail = await eel.fetch_book_detail(book.id)();
+                if (detail.success) {
+                    window._readerCanEdit = detail.can_edit;
+                    const isReadOnly = detail.book.is_read_only === true || detail.book.is_read_only === 1 || detail.book.is_read_only === 'true';
+                    const isOwner = detail.is_owner;
+                    
+                    const editBtn = document.getElementById('readerEditBtn');
+                    const reqBtn = document.getElementById('readerRequestBtn');
+                    
+                    if (window._readerCanEdit) {
+                        editBtn.style.display = 'flex';
+                        reqBtn.style.display = 'none';
+                        if (isOwner && isReadOnly) {
+                            editBtn.innerHTML = '✏️ Edit (Owner Bypass)';
+                            editBtn.title = 'You can edit this Read-Only book because you are the Owner.';
+                        } else {
+                            editBtn.innerHTML = '✏️ Edit Translation';
+                            editBtn.title = '';
+                        }
+                    } else if (isReadOnly) {
+                        editBtn.style.display = 'none';
+                        reqBtn.style.display = 'flex';
+                    } else {
+                        editBtn.style.display = 'flex';
+                        reqBtn.style.display = 'none';
+                        editBtn.innerHTML = '✏️ Edit Translation';
+                        editBtn.title = '';
+                    }
+                }
+            } catch (e) {
+                console.error('Permission check failed:', e);
+            }
+
+            // Swap views
+            document.getElementById('libraryContainer').style.display = 'none';
+            document.querySelector('#tab-library .library-controls')?.style && (document.querySelector('#tab-library .library-controls').style.display = 'none');
+            document.getElementById('libraryReaderView').style.display = 'flex';
+
+            // Load first page
+            loadReaderPage(0);
+        }
+
+        function closeLibraryReader() {
+            document.getElementById('libraryReaderView').style.display = 'none';
+            document.getElementById('libraryContainer').style.display = 'block';
+            const controls = document.querySelector('#tab-library .library-controls');
+            if (controls) controls.style.display = 'flex';
+            
+            window._readerBookId = null;
+            window._readerBookData = null;
+        }
+
+        async function loadReaderPage(pageIndex) {
+            const imgEl = document.getElementById('readerImageArea');
+            const origEl = document.getElementById('readerOriginalText');
+            const transEl = document.getElementById('readerTranslatedText');
+            const counterEl = document.getElementById('readerPageCounter');
+
+            imgEl.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-family:var(--font-mono); font-size:12px;">⏳ Loading image...</div>';
+            origEl.textContent = 'Loading...';
+            transEl.textContent = 'Loading...';
+
+            try {
+                const res = await eel.fetch_book_page(window._readerBookId, pageIndex)();
+                if (res.success) {
+                    window._readerTotalPages = res.total_pages || 1;
+                    window._readerPage = pageIndex;
+
+                    if (res.page) {
+                        origEl.textContent = res.page.original || '(No original text)';
+                        transEl.textContent = res.page.english || res.page.literal || '(No translation yet)';
+                        
+                        // Handle image
+                        if (res.page.image_url) {
+                            // Add a cache buster or timestamp to prevent old cached images if needed, but not strictly required
+                            imgEl.innerHTML = `<img src="${res.page.image_url}" style="max-width:100%; height:auto; border-radius:4px; box-shadow:0 4px 12px rgba(0,0,0,0.5);" onerror="this.parentElement.innerHTML='<div style=&quot;text-align:center; color:var(--text-muted); font-family:var(--font-mono); font-size:12px;&quot;>📄 Image missing from cloud storage</div>'">`;
+                        } else {
+                            imgEl.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-family:var(--font-mono); font-size:12px;">📄 No image returned</div>';
+                        }
+                    } else {
+                        origEl.textContent = '(Empty page)';
+                        transEl.textContent = '(Empty page)';
+                        imgEl.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-family:var(--font-mono); font-size:12px;">📄 Empty page</div>';
+                    }
+
+                    counterEl.textContent = `Page ${pageIndex + 1} / ${window._readerTotalPages}`;
+                } else {
+                    origEl.textContent = `Error: ${res.error}`;
+                    transEl.textContent = '';
+                    imgEl.innerHTML = '<div style="text-align:center; color:#E74C3C; font-family:var(--font-mono); font-size:12px;">Failed to load</div>';
+                }
+            } catch (e) {
+                origEl.textContent = 'Failed to load page.';
+                transEl.textContent = '';
+                imgEl.innerHTML = '<div style="text-align:center; color:#E74C3C; font-family:var(--font-mono); font-size:12px;">Failed to load</div>';
+                console.error('Load page error:', e);
+            }
+        }
+
+        function readerPrevPage() {
+            if (window._readerPage > 0) {
+                loadReaderPage(window._readerPage - 1);
+            }
+        }
+
+        function readerNextPage() {
+            if (window._readerPage < window._readerTotalPages - 1) {
+                loadReaderPage(window._readerPage + 1);
+            }
+        }
+
+        // ========================================
+        // READER ACTION BUTTONS
+        // ========================================
+        async function handleCloneBook() {
+            if (!window._readerBookId) return;
+            try {
+                const res = await eel.clone_book(window._readerBookId)();
+                if (res.success) {
+                    alert('📋 Book cloned to your projects! Check My Projects.');
+                    refreshUserProjects();
+                } else {
+                    alert('Clone failed: ' + (res.error || 'Unknown error'));
+                }
+            } catch (e) {
+                alert('Clone error: ' + e);
+            }
+        }
+
+        function handleReaderEdit() {
+            if (!window._readerBookData) return;
+            // Switch to translator tab and load this book
+            openProjectInTranslator(window._readerBookData);
+            closeLibraryReader();
+        }
+
+        async function handleRequestAccess() {
+            if (!window._readerBookId) return;
+            try {
+                const res = await eel.request_edit_access(window._readerBookId)();
+                if (res.success) {
+                    alert('🔒 Edit access requested! The publisher will be notified.');
+                    // Change button to show pending state
+                    const btn = document.getElementById('readerRequestBtn');
+                    btn.innerHTML = '⏳ Request Pending';
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                } else {
+                    alert(res.error || 'Request failed.');
+                }
+            } catch (e) {
+                alert('Request error: ' + e);
+            }
+        }
+
+        // SUGGEST EDIT MODAL
+        function openSuggestModal() {
+            document.getElementById('suggestPageRef').value = `Page ${window._readerPage + 1} of "${window._readerBookData?.title || 'Untitled'}"`;
+            document.getElementById('suggestOriginal').value = '';
+            document.getElementById('suggestNew').value = '';
+            document.getElementById('suggestError').textContent = '';
+            document.getElementById('suggestEditModal').classList.add('active');
+        }
+
+        function closeSuggestModal() {
+            document.getElementById('suggestEditModal').classList.remove('active');
+        }
+
+        async function submitSuggestion() {
+            const original = document.getElementById('suggestOriginal').value.trim();
+            const suggested = document.getElementById('suggestNew').value.trim();
+            const errEl = document.getElementById('suggestError');
+
+            if (!original || !suggested) {
+                errEl.textContent = 'Both fields are required.';
+                return;
+            }
+
+            try {
+                const res = await eel.submit_suggestion(window._readerBookId, window._readerPage, original, suggested)();
+                if (res.success) {
+                    alert('💡 Suggestion submitted! The publisher will see it in their inbox.');
+                    closeSuggestModal();
+                } else {
+                    errEl.textContent = res.error || 'Failed to submit.';
+                }
+            } catch (e) {
+                errEl.textContent = 'Error: ' + e;
+            }
+        }
+
+        // ========================================
+        // MY PROJECTS → OPEN IN TRANSLATOR
+        // ========================================
+        async function openProjectInTranslator(book) {
+            // Switch to translator tab
+            switchTab('translator');
+
+            // Show workspace, hide dropzone
+            const dropzone = document.querySelector('.translator-dropzone-state');
+            const workspace = document.querySelector('.translator-workspace');
+            if (dropzone) dropzone.style.display = 'none';
+            if (workspace) workspace.style.display = 'flex';
+
+            // Load first page into the translator panes
+            try {
+                const res = await eel.fetch_book_page(book.id, 0)();
+                if (res.success && res.page) {
+                    // Get pane content areas
+                    const panes = document.querySelectorAll('.pane-content');
+                    if (panes.length >= 3) {
+                        // Pane 0 = Original Image (show text for now)
+                        panes[0].innerHTML = `<pre class="code-block" style="white-space:pre-wrap;">${res.page.original || '(No original text)'}</pre>`;
+                        // Pane 1 = OCR Text
+                        panes[1].innerHTML = `<pre class="code-block" style="white-space:pre-wrap;">${res.page.original || '(No OCR text)'}</pre>`;
+                        // Pane 2 = Translated
+                        panes[2].innerHTML = `<pre class="code-block" style="white-space:pre-wrap;">${res.page.english || res.page.literal || '(No translation yet)'}</pre>`;
+                    }
+
+                    // Update progress/page info
+                    const fileInfo = document.querySelector('.file-info');
+                    if (fileInfo) {
+                        fileInfo.innerHTML = `<span>${book.title || 'Untitled'}</span><span>Page 1 / ${res.total_pages || '?'}</span><span>${book.language || ''}</span>`;
+                    }
+
+                    // Store book context for translator
+                    window._translatorBookId = book.id;
+                    window._translatorBookData = book;
+                    window._translatorPage = 0;
+                    window._translatorTotalPages = res.total_pages || 1;
+                }
+            } catch (e) {
+                console.error('Failed to load book into translator:', e);
+            }
+        }
+
+        // ========================================
+        // TRANSLATOR CORE JAVASCRIPT
+        // ========================================
+
+        let _translatorCurrentPage = 0;
+        let _translatorTotalPages = 0;
+        let _translatorIsRunning = false;
+        let _translatorBookTitle = '';
+
+        // --- Init Language Dropdowns ---
+        async function initTranslatorLanguages() {
+            try {
+                const res = await eel.get_languages()();
+                if (res.success) {
+                    const srcSelect = document.getElementById('translatorSourceLang');
+                    const tgtSelect = document.getElementById('translatorTargetLang');
+                    if (!srcSelect || !tgtSelect) return;
+                    srcSelect.innerHTML = '';
+                    tgtSelect.innerHTML = '';
+                    res.languages.forEach(lang => {
+                        srcSelect.innerHTML += `<option value="${lang}">${lang}</option>`;
+                        tgtSelect.innerHTML += `<option value="${lang}">${lang}</option>`;
+                    });
+                    srcSelect.value = 'Auto-Detect';
+                    tgtSelect.value = 'English';
+                }
+            } catch (e) { console.error('Failed to load languages:', e); }
+        }
+        // Call on app load
+        initTranslatorLanguages();
+
+        // --- PDF Upload (click) ---
+        async function handlePDFClick() {
+            const label = document.querySelector('.translator-drop-title');
+            if (label) label.textContent = 'Opening file dialog...';
+            try {
+                const res = await eel.trigger_pdf_upload()();
+                if (res.success) {
+                    _translatorBookTitle = res.title || 'Untitled';
+                    _translatorTotalPages = res.total_pages || 1;
+                    _translatorCurrentPage = 0;
+                    showTranslatorWorkspace();
+                    loadTranslatorPage(0);
+                } else {
+                    if (label) label.textContent = 'Drop a PDF here or click to browse';
+                    if (res.error && res.error !== 'No file selected.') {
+                        alert('Error: ' + res.error);
+                    }
+                }
+            } catch (e) {
+                if (label) label.textContent = 'Drop a PDF here or click to browse';
+                console.error('PDF upload error:', e);
+            }
+        }
+
+        // --- PDF Drop ---
+        function handlePDFDrop(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            // Eel cannot receive dropped files directly, so fallback to file dialog
+            handlePDFClick();
+        }
+
+        // --- Show Workspace ---
+        function showTranslatorWorkspace() {
+            const dropzone = document.getElementById('translator-dropzone-state');
+            const workspace = document.getElementById('translator-workspace');
+            if (dropzone) dropzone.style.display = 'none';
+            if (workspace) workspace.style.display = 'flex';
+            // Update page total
+            const total = document.getElementById('translatorPageTotal');
+            const jump = document.getElementById('translatorPageJump');
+            if (total) total.textContent = `/ ${_translatorTotalPages}`;
+            if (jump) { jump.max = _translatorTotalPages; jump.value = 1; }
+            // Reset progress
+            const label = document.getElementById('translator-progress-label');
+            const fill = document.getElementById('translator-progress-fill');
+            if (label) label.textContent = `Loaded "${_translatorBookTitle}" (${_translatorTotalPages} pages) — Press START`;
+            if (fill) fill.style.width = '0%';
+            // Reset start button
+            const btn = document.getElementById('translator-start-btn');
+            if (btn) { btn.textContent = '▶ START'; btn.classList.remove('running'); }
+            _translatorIsRunning = false;
+        }
+
+        // --- Load Specific Page ---
+        async function loadTranslatorPage(pageIdx) {
+            if (pageIdx < 0 || pageIdx >= _translatorTotalPages) return;
+            _translatorCurrentPage = pageIdx;
+            
+            // Update jump input
+            const jump = document.getElementById('translatorPageJump');
+            if (jump) jump.value = pageIdx + 1;
+
+            try {
+                const res = await eel.load_translator_page(pageIdx)();
+                if (res.success) {
+                    // Image pane
+                    const imgArea = document.getElementById('translatorImageArea');
+                    const imgMeta = document.getElementById('translatorImageMeta');
+                    if (imgArea) {
+                        imgArea.innerHTML = '<div style="text-align:center; color:var(--text-muted);">⏳ Loading image...</div>';
+                        // Fetch image as base64 in background
+                        eel.get_page_image_base64(pageIdx)().then(imgRes => {
+                            if (imgRes.success) {
+                                imgArea.innerHTML = `<img src="${imgRes.data_url}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px;">`;
+                            } else {
+                                imgArea.innerHTML = '<div style="text-align:center; color:var(--text-muted);">📄 Image not available</div>';
+                            }
+                        }).catch(() => {
+                            imgArea.innerHTML = '<div style="text-align:center; color:var(--text-muted);">📄 Image not available</div>';
+                        });
+                    }
+                    if (imgMeta) imgMeta.textContent = `[page_${String(pageIdx + 1).padStart(3, '0')}]`;
+
+                    // OCR pane
+                    const ocrText = document.getElementById('translatorOCRText');
+                    const ocrMeta = document.getElementById('translatorOCRMeta');
+                    if (ocrText) {
+                        ocrText.value = res.original || '';
+                        ocrText.style.textAlign = res.is_centered ? 'center' : (res.is_rtl_page ? 'right' : 'left');
+                        ocrText.style.direction = res.is_rtl_page ? 'rtl' : 'ltr';
+                    }
+                    if (ocrMeta) {
+                        const src = document.getElementById('translatorSourceLang');
+                        ocrMeta.textContent = `[${src ? src.value : 'Source'}]`;
+                    }
+
+                    // Translation pane
+                    const transText = document.getElementById('translatorTransText');
+                    const transMeta = document.getElementById('translatorTransMeta');
+                    if (transText) {
+                        transText.value = res.translated || '';
+                        transText.style.textAlign = res.is_centered ? 'center' : 'left';
+                    }
+                    if (transMeta) {
+                        const tgt = document.getElementById('translatorTargetLang');
+                        transMeta.textContent = `[${tgt ? tgt.value : 'Target'}]`;
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load page:', e);
+            }
+        }
+
+        // --- Save User Edits to Backend ---
+        function saveTranslatorEdits() {
+            if (_translatorCurrentPage < 0) return;
+            const ocr = document.getElementById('translatorOCRText').value || "";
+            const trans = document.getElementById('translatorTransText').value || "";
+            eel.save_translator_page_edits(_translatorCurrentPage, ocr, trans);
+        }
+
+        // --- Pagination ---
+        function translatorPrevPage() {
+            if (_translatorCurrentPage > 0) loadTranslatorPage(_translatorCurrentPage - 1);
+        }
+        function translatorNextPage() {
+            if (_translatorCurrentPage < _translatorTotalPages - 1) loadTranslatorPage(_translatorCurrentPage + 1);
+        }
+        function jumpToTranslatorPage() {
+            const jump = document.getElementById('translatorPageJump');
+            if (jump) {
+                const val = parseInt(jump.value, 10);
+                if (val >= 1 && val <= _translatorTotalPages) {
+                    loadTranslatorPage(val - 1);
+                }
+            }
+        }
+
+        // --- Start / Stop Translation ---
+        async function toggleTranslation() {
+            const btn = document.getElementById('translator-start-btn');
+            if (_translatorIsRunning) {
+                // Stop
+                await eel.stop_translation()();
+                _translatorIsRunning = false;
+                if (btn) { btn.textContent = '▶ START'; btn.classList.remove('running'); }
+                const label = document.getElementById('translator-progress-label');
+                if (label) label.textContent = 'Translation paused.';
+            } else {
+                // Start
+                const srcLang = document.getElementById('translatorSourceLang')?.value || 'Auto-Detect';
+                const tgtLang = document.getElementById('translatorTargetLang')?.value || 'English';
+                const engine = 'Google'; // Default engine for now
+                const res = await eel.start_translation(srcLang, tgtLang, engine)();
+                if (res.success) {
+                    _translatorIsRunning = true;
+                    if (btn) { btn.textContent = '⏸ PAUSE'; btn.classList.add('running'); }
+                } else {
+                    alert('Error: ' + (res.error || 'Unknown'));
+                }
+            }
+        }
+
+        // --- Clear Translator ---
+        async function clearTranslator() {
+            await eel.clear_translation()();
+            _translatorIsRunning = false;
+            _translatorCurrentPage = 0;
+            _translatorTotalPages = 0;
+            _translatorBookTitle = '';
+            // Reset UI to dropzone
+            const dropzone = document.getElementById('translator-dropzone-state');
+            const workspace = document.getElementById('translator-workspace');
+            if (dropzone) dropzone.style.display = 'flex';
+            if (workspace) workspace.style.display = 'none';
+            // Reset label
+            const label = document.querySelector('.translator-drop-title');
+            if (label) label.textContent = 'Drop a PDF here or click to browse';
+            // Reset button
+            const btn = document.getElementById('translator-start-btn');
+            if (btn) { btn.textContent = '▶ START'; btn.classList.remove('running'); }
+        }
+
+
+
+        async function triggerRescanCurrentPage() {
+            if (_translatorCurrentPage < 0 || _translatorIsRunning) return;
+            
+            const srcLang = document.getElementById('translatorSourceLang')?.value || 'Auto-Detect';
+            const tgtLang = document.getElementById('translatorTargetLang')?.value || 'English';
+            const engine = 'Google'; // Default engine for now
+            
+            // Visual feedback on the rescan button
+            const rescanBtn = document.getElementById('translator-rescan-btn');
+            if (rescanBtn) {
+                const oldHtml = rescanBtn.innerHTML;
+                rescanBtn.innerHTML = '🔄 RESCANNING...';
+                rescanBtn.style.color = 'var(--accent-green)';
+                rescanBtn.style.borderColor = 'var(--accent-green)';
+                rescanBtn.style.background = 'rgba(74, 222, 128, 0.15)';
+                // We'll reset it when the rescan completes
+                rescanBtn._oldHtml = oldHtml;
+            }
+            
+            // Save current progress bar state before rescan
+            _rescanInProgress = true;
+            const fill = document.getElementById('translator-progress-fill');
+            if (fill) _savedProgressWidth = fill.style.width;
+            
+            const btn = document.getElementById('translator-start-btn');
+            _translatorIsRunning = true;
+            
+            try {
+                const res = await eel.rescan_translator_page(_translatorCurrentPage, srcLang, tgtLang, engine)();
+                if (!res.success) {
+                    alert('Failed to start rescan: ' + res.error);
+                    _translatorIsRunning = false;
+                    _rescanInProgress = false;
+                    if (rescanBtn && rescanBtn._oldHtml) {
+                        rescanBtn.innerHTML = rescanBtn._oldHtml;
+                        rescanBtn.style.color = '';
+                        rescanBtn.style.borderColor = '';
+                        rescanBtn.style.background = '';
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                _translatorIsRunning = false;
+                _rescanInProgress = false;
+                if (rescanBtn && rescanBtn._oldHtml) {
+                    rescanBtn.innerHTML = rescanBtn._oldHtml;
+                    rescanBtn.style.color = '';
+                    rescanBtn.style.borderColor = '';
+                    rescanBtn.style.background = '';
+                }
+            }
+        }
+
+        let _rescanInProgress = false;
+        let _savedProgressWidth = '0%';
+        
+        // --- Eel Callbacks: Progress Updates ---
+        eel.expose(update_translator_progress);
+        function update_translator_progress(data) {
+            const label = document.getElementById('translator-progress-label');
+            const fill = document.getElementById('translator-progress-fill');
+            
+            // If a rescan just finished, restore the real progress bar and reset the rescan button
+            if (_rescanInProgress && (data.percent >= 100 || data.status?.includes('Complete') || data.status?.includes('Stopped'))) {
+                _rescanInProgress = false;
+                _translatorIsRunning = false;
+                
+                // Restore progress bar to its real position
+                if (fill) fill.style.width = _savedProgressWidth;
+                
+                // Count actual completed pages for a proper label
+                let completedCount = 0;
+                // We'll just show a friendly message instead of "Translation Complete!"
+                if (label) label.textContent = `Page ${_translatorCurrentPage + 1} rescanned successfully.`;
+                
+                // Reset the rescan button visual
+                const rescanBtn = document.getElementById('translator-rescan-btn');
+                if (rescanBtn && rescanBtn._oldHtml) {
+                    rescanBtn.innerHTML = rescanBtn._oldHtml;
+                    rescanBtn.style.color = '';
+                    rescanBtn.style.borderColor = '';
+                    rescanBtn.style.background = '';
+                }
+                
+                const btn = document.getElementById('translator-start-btn');
+                if (btn) { btn.textContent = '▶ START'; btn.classList.remove('running'); }
+                return;
+            }
+            
+            if (label) label.textContent = data.status || '';
+            if (fill) fill.style.width = `${data.percent || 0}%`;
+
+            // If done, reset the button
+            if (data.percent >= 100 || data.status?.includes('Complete') || data.status?.includes('Stopped')) {
+                _translatorIsRunning = false;
+                const btn = document.getElementById('translator-start-btn');
+                if (btn) { btn.textContent = '▶ START'; btn.classList.remove('running'); }
+            }
+        }
+
+        eel.expose(update_translator_page_done);
+        function update_translator_page_done(data) {
+            // If we're currently viewing this page, refresh it
+            if (data.page_index === _translatorCurrentPage) {
+                loadTranslatorPage(_translatorCurrentPage);
+            }
+        }
+
+        // --- Search ---
+        async function searchPDFContent() {
+            const input = document.getElementById('translatorSearchInput');
+            if (!input || !input.value.trim()) return;
+            try {
+                const res = await eel.search_pdf_text(input.value.trim())();
+                if (res.success && res.results.length > 0) {
+                    // Jump to first match
+                    loadTranslatorPage(res.results[0].page);
+                    const label = document.getElementById('translator-progress-label');
+                    if (label) label.textContent = `Found ${res.results.length} match(es). Showing page ${res.results[0].page + 1}.`;
+                } else {
+                    const label = document.getElementById('translator-progress-label');
+                    if (label) label.textContent = `No results found for "${input.value}".`;
+                }
+            } catch (e) {
+                console.error('Search failed:', e);
+            }
+        }
+
+        // --- Publish Modal ---
+        function openPublishModal() {
+            document.getElementById('publishModal').style.display = 'flex';
+            document.getElementById('publishTitle').value = _translatorBookTitle || '';
+            document.getElementById('publishError').textContent = '';
+        }
+        function closePublishModal() {
+            document.getElementById('publishModal').style.display = 'none';
+        }
+        async function submitPublish() {
+            const title = document.getElementById('publishTitle').value.trim();
+            const category = document.getElementById('publishCategory').value.trim();
+            const description = document.getElementById('publishDescription').value.trim();
+            const tags = document.getElementById('publishTags').value.trim();
+            const isPublic = document.getElementById('publishPublic').checked;
+            const isReadOnly = document.getElementById('publishReadOnly').checked;
+            const srcLang = document.getElementById('translatorSourceLang')?.value || 'Auto-Detect';
+            const tgtLang = document.getElementById('translatorTargetLang')?.value || 'English';
+
+            if (!title) {
+                document.getElementById('publishError').textContent = 'Title is required.';
+                return;
+            }
+
+            const btn = document.getElementById('publishSubmitBtn');
+            btn.textContent = '⏳ UPLOADING...';
+            btn.disabled = true;
+
+            try {
+                const res = await eel.publish_book_to_cloud(title, category, description, tags, isPublic, isReadOnly, srcLang, tgtLang)();
+                if (res.success) {
+                    closePublishModal();
+                    const label = document.getElementById('translator-progress-label');
+                    if (label) label.textContent = `✅ Published "${title}" to CLOUD!`;
+                    // Refresh libraries
+                    if (typeof refreshGlobalLibrary === 'function') refreshGlobalLibrary();
+                    if (typeof refreshUserProjects === 'function') refreshUserProjects();
+                } else {
+                    document.getElementById('publishError').textContent = res.error || 'Unknown error.';
+                }
+            } catch (e) {
+                document.getElementById('publishError').textContent = 'Network error: ' + e;
+            } finally {
+                btn.textContent = '🚀 PUBLISH';
+                btn.disabled = false;
+            }
+        }
+        // === QUICK TRANSLATE LOGIC ===
+        let _qtCurrentMode = 'text';
+        let _qtImageBase64 = null;
+
+        // Copy Feedback helper (works on HTTP localhost too)
+        function copyTextToClipboard(elementId, btn) {
+            const textEl = document.getElementById(elementId);
+            const oldHtml = btn.innerHTML;
+            
+            let textValue = '';
+            if (textEl) {
+                // Support both textarea (.value) and pre/div (.textContent)
+                textValue = (textEl.value !== undefined) ? textEl.value : textEl.textContent;
+            }
+            // Strip out placeholder text if it's the default element text inside pre
+            if (textValue && textValue.includes('No content loaded')) textValue = '';
+            
+            if (!textValue || !textValue.trim()) {
+                // Still give visual feedback even if nothing to copy
+                btn.innerHTML = '⚠️ Empty!';
+                btn.style.color = '#e67e22';
+                btn.style.borderColor = '#e67e22';
+                btn.style.background = 'rgba(230, 126, 34, 0.15)';
+                setTimeout(() => {
+                    btn.innerHTML = oldHtml;
+                    btn.style.color = '';
+                    btn.style.borderColor = '';
+                    btn.style.background = '';
+                }, 1500);
+                return;
+            }
+            
+            // Use a temporary textarea to copy — works on HTTP unlike navigator.clipboard
+            const tmp = document.createElement('textarea');
+            tmp.value = textValue;
+            tmp.style.position = 'fixed';
+            tmp.style.left = '-9999px';
+            document.body.appendChild(tmp);
+            tmp.select();
+            document.execCommand('copy');
+            document.body.removeChild(tmp);
+            
+            btn.innerHTML = '✅ Copied!';
+            btn.style.color = 'var(--accent-green)';
+            btn.style.borderColor = 'var(--accent-green)';
+            btn.style.background = 'rgba(74, 222, 128, 0.15)';
+            
+            setTimeout(() => {
+                btn.innerHTML = oldHtml;
+                btn.style.color = '';
+                btn.style.borderColor = '';
+                btn.style.background = '';
+            }, 2000);
+        }
+
+        function setQTMode(mode, btn) {
+            _qtCurrentMode = mode;
+            document.querySelectorAll('.qt-mode-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            
+            document.getElementById('qt-mode-text').style.display = (mode === 'text') ? 'flex' : 'none';
+            document.getElementById('qt-mode-image').style.display = (mode === 'image') ? 'flex' : 'none';
+        }
+
+        function swapQTLangs() {
+            const src = document.getElementById('qtSourceLang');
+            const tgt = document.getElementById('qtTargetLang');
+            const temp = src.value;
+            src.value = tgt.value;
+            tgt.value = temp;
+        }
+
+        // Image upload handling
+        function triggerQTImageUpload() {
+            document.getElementById('qtImageInput').click();
+        }
+
+        function handleQTImageSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                _qtImageBase64 = evt.target.result;
+                document.getElementById('qtImageStatus').textContent = file.name;
+                document.getElementById('qtImageDropzone').style.borderColor = 'var(--accent-green)';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function executeQuickTranslate() {
+            const btn = document.getElementById('qtTranslateBtn');
+            const src = document.getElementById('qtSourceLang').value;
+            const tgt = document.getElementById('qtTargetLang').value;
+            const engine = document.getElementById('qtEngineSelect').value;
+            
+            btn.textContent = '⏳ TRANSLATING...';
+            btn.disabled = true;
+
+            try {
+                if (_qtCurrentMode === 'text') {
+                    const textIn = document.getElementById('qtTextInput').value;
+                    const textOut = document.getElementById('qtTextOutput');
+                    if (!textIn.trim()) { alert("Please enter text."); return; }
+                    
+                    textOut.value = 'Translating...';
+                    const res = await eel.quick_translate_text(textIn, src, tgt, engine)();
+                    if (res.success) {
+                        textOut.value = res.translated;
+                    } else {
+                        textOut.value = `[Error] ${res.error}`;
+                    }
+                } else {
+                    // Image Mode
+                    if (!_qtImageBase64) { alert("Please browse or drop an image first."); return; }
+                    const ocrOut = document.getElementById('qtOcrOutput');
+                    const transOut = document.getElementById('qtImageTransOutput');
+                    
+                    ocrOut.value = 'Running OCR engine...';
+                    transOut.value = 'Waiting for OCR...';
+                    
+                    const res = await eel.quick_translate_image(_qtImageBase64, src, tgt, engine)();
+                    if (res.success) {
+                        ocrOut.value = res.original;
+                        transOut.value = res.translated;
+                    } else {
+                        ocrOut.value = `[Error] ${res.error}`;
+                        transOut.value = `[Error] ${res.error}`;
+                    }
+                }
+            } catch (e) {
+                console.error("Quick translate error:", e);
+                alert("Translation failed: " + e);
+            } finally {
+                btn.textContent = '⚡ TRANSLATE';
+                btn.disabled = false;
+            }
+        }
+
+        // Initialize Languages concurrently for QT and Translator
+        async function initAllLanguages() {
+            try {
+                const res = await eel.get_languages()();
+                if (res.success) {
+                    const langs = res.languages;
+                    const sourceSelects = [document.getElementById('translatorSourceLang'), document.getElementById('qtSourceLang')];
+                    const targetSelects = [document.getElementById('translatorTargetLang'), document.getElementById('qtTargetLang')];
+                    
+                    sourceSelects.forEach(sel => {
+                        if (!sel) return;
+                        sel.innerHTML = '';
+                        langs.forEach(l => {
+                            const opt = document.createElement('option');
+                            opt.value = l; opt.textContent = l;
+                            sel.appendChild(opt);
+                        });
+                        sel.value = 'Auto-Detect';
+                    });
+                    
+                    targetSelects.forEach(sel => {
+                        if (!sel) return;
+                        sel.innerHTML = '';
+                        langs.forEach(l => {
+                            if (l !== 'Auto-Detect') {
+                                const opt = document.createElement('option');
+                                opt.value = l; opt.textContent = l;
+                                sel.appendChild(opt);
+                            }
+                        });
+                        sel.value = 'English';
+                    });
+                }
+            } catch (e) {
+                console.error("Failed to load languages:", e);
+            }
+        }
+        
+        // Call it right away
+        initAllLanguages();
+
+        // === UI ROUTING FOR LOCAL PROJECTS ===
+        async function resumeLocalProject(projectId) {
+            const btn = event.currentTarget || event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ LOADING...';
+            btn.disabled = true;
+            document.getElementById('translator-progress-label').textContent = "Loading project data...";
+            
+            try {
+                const res = await eel.resume_local_project(projectId)();
+                if (res.success) {
+                    switchTab('translator');
+                    // Setup UI to match backend state
+                    _translatorTotalPages = window.cached_total_pages || 1; // Relying on the update callback right after load
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                } else {
+                    alert("Failed to resume project: " + res.error);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch(e) {
+                console.error("Resume error", e);
+                alert("Error: " + e);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function deleteLocalProject(projectId, bookName) {
+            if (confirm(`Are you sure you want to delete local project: ${bookName}?`)) {
+                // Not actually implemented in backend yet, but UI stub
+                alert("Backend deletion not wired up yet, but triggered for " + projectId);
+            }
+        }
+
+        // === MY PROJECTS FETCHING & RENDERING ===
+        async function refreshUserProjects() {
+            const inProgressList = document.getElementById('projectsList');
+            if (!inProgressList) return;
+
+            // Update Local "In Progress"
+            try {
+                const res = await eel.get_local_projects()();
+                if (res.success) {
+                    inProgressList.innerHTML = '';
+                    if (res.projects.length === 0) {
+                        inProgressList.innerHTML = '<div class="status-msg">No local translations in progress. Drop a PDF into the Translator to begin!</div>';
+                    } else {
+                        res.projects.forEach(p => {
+                            const dateStr = new Date(p.last_accessed * 1000).toLocaleString();
+                            const card = document.createElement('div');
+                            card.className = 'library-card';
+                            
+                            // Try to show cover
+                            const imgHtml = p.cover_base64 
+                                ? `<img src="${p.cover_base64}" alt="Cover" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; opacity:0.8; z-index:0;">`
+                                : `<div class="lib-icon">📄</div>`;
+
+                            card.innerHTML = `
+                                <div class="lib-cover" style="position:relative; overflow:hidden;">
+                                    ${imgHtml}
+                                    <div class="lib-read-time" style="font-size:12px; padding:6px 12px; font-weight:700; background:var(--accent-green); color:var(--bg-dark);">LOCAL</div>
+                                    <div class="lib-description-overlay">Completed: ${p.completed_pages || 0} of ${p.total_pages || '?'} pages</div>
+                                </div>
+                                <div class="lib-info" style="position:relative;">
+                                    <span class="lib-title" style="font-size:16px; margin-bottom:6px;" title="${p.book_name}">${p.book_name}</span>
+                                    <span class="lib-author" style="color:var(--text-dim); font-size:13px;">Last modified: ${dateStr}</span>
+                                    
+                                    <div class="lib-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; gap:8px;">
+                                        <button class="footer-btn green" style="flex:1; font-size:11px; padding:5px 0; font-weight:700;" onclick="resumeLocalProject('${p.id}')">▶ RESUME</button>
+                                        <button class="footer-btn red" style="flex:1; font-size:11px; padding:5px 0; background:rgba(231,76,60,0.2); color:#E74C3C; border-color:rgba(231,76,60,0.5);" onclick="deleteLocalProject('${p.id}', '${p.book_name}')">🗑 DELETE</button>
+                                    </div>
+                                </div>
+                            `;
+                            inProgressList.appendChild(card);
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to load local projects:", e);
+                inProgressList.innerHTML = '<div class="status-msg">Error loading local projects.</div>';
+            }
+            
+            // Note: The published cloud projects will be handled later if needed,
+            // or we could fetch them here via eel.fetch_user_projects().
+            const pubList = document.getElementById('publishedList');
+            if (pubList) {
+                try {
+                    const pubRes = await eel.fetch_user_projects()();
+                    if (pubRes && pubRes.success) {
+                        pubList.innerHTML = '';
+                        window.allProjects = pubRes.projects; // Store for edit modal
+                        if (pubRes.projects.length === 0) {
+                            pubList.innerHTML = '<div class="status-msg">You have not published any projects to the cloud.</div>';
+                        } else {
+                            pubRes.projects.forEach(book => {
+                                const isRO = book.is_read_only ? `<span style="color:#E74C3C; font-size:10px; margin-left:5px;">[Read-Only]</span>` : '';
+                                
+                                const icon = ['📕','📗','📘','📙','📓','📔'][Math.floor(Math.random() * 6)];
+                                const isPubHtml = book.is_public 
+                                    ? `<div class="lib-read-time" style="font-size:12px; padding:6px 12px; font-weight:700; background:rgba(39, 174, 96, 0.2); color:var(--accent-green); border:1px solid rgba(39, 174, 96, 0.5);">🔓 Public</div>` 
+                                    : `<div class="lib-read-time" style="font-size:12px; padding:6px 12px; font-weight:700; background:rgba(231, 76, 60, 0.2); color:#e74c3c; border:1px solid rgba(231, 76, 60, 0.5);">🔒 Private</div>`;
+                                    
+                                const tags = (book.tags || '').split(',').map(t => t.trim()).filter(t => t);
+                                
+                                const card = document.createElement('div');
+                                card.className = 'library-card';
+                                card.innerHTML = `
+                                    <div class="lib-cover" style="position:relative;">
+                                        <div class="lib-icon">${icon}</div>
+                                        <div class="lib-description-overlay">${book.description || 'NO NEURAL DESCRIPTION PROVIDED.'}</div>
+                                        ${isPubHtml}
+                                    </div>
+                                    <div class="lib-info" style="position:relative;">
+                                        <span class="lib-title" style="font-size:18px; margin-bottom:6px;" title="${book.title}">${book.title} ${isRO}</span>
+                                        <span class="lib-author" style="color:var(--accent-green); font-size:13px;">by You</span>
+                                        
+                                        <div class="lib-tags" style="margin-top:8px; height:24px; overflow:hidden;">
+                                            ${tags.map(t => `<span style="font-size:10px; background:var(--bg-pane); padding:2px 6px; border-radius:3px; margin-right:4px; border:1px solid var(--border-dim);">#${t}</span>`).join('')}
+                                        </div>
+                                        
+                                        <div class="lib-footer" style="display:flex; justify-content:flex-end; align-items:center; margin-top:15px;">
+                                            <button class="pulse-btn" onclick="event.stopPropagation(); openProjectEditModal('${book.id}')" style="background:var(--bg-panel); border:1px solid var(--border-dim); border-radius:20px; padding:6px 15px; color:var(--text-white); cursor:pointer; font-size:18px; transition:0.3s; display:flex; align-items:center; gap:8px; box-shadow:0 2px 10px rgba(0,0,0,0.3);" title="Project Settings">
+                                                ⚙️ <span style="font-size:12px; font-family:var(--font-mono); font-weight:700; top:-1px; position:relative;">Edit</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                                pubList.appendChild(card);
+                            });
+                        }
+                    }
+                } catch(e) {
+                    pubList.innerHTML = '<div class="status-msg">Requires login to view cloud projects.</div>';
+                }
+            }
+        }
+
+        async function resumeLocalProject(hashId) {
+            const btn = event.currentTarget;
+            const originalText = btn.textContent;
+            btn.textContent = "⏳ LOADING...";
+            btn.disabled = true;
+
+            try {
+                const res = await eel.resume_local_project(hashId)();
+                if (res.success) {
+                    // Update Translator UI state
+                    document.getElementById('translator-dropzone-state').style.display = 'none';
+                    document.getElementById('translator-workspace').style.display = 'flex';
+                    document.getElementById('translatorPageTotal').textContent = `/ ${res.total_pages}`;
+                    document.getElementById('translatorPageJump').max = res.total_pages;
+                    document.getElementById('translatorPageJump').value = res.last_page + 1;
+                    
+                    // Set dropdowns if they exist
+                    const srcSel = document.getElementById('translatorSourceLang');
+                    const tgtSel = document.getElementById('translatorTargetLang');
+                    if (srcSel) srcSel.value = res.source_lang;
+                    if (tgtSel) tgtSel.value = res.target_lang;
+
+                    // Load the page
+                    _translatorCurrentPage = res.last_page;
+                    loadTranslatorPage(res.last_page);
+
+                    // Switch back to translator tab
+                    switchTab('translator', document.querySelector('.sidebar-icon[data-tab="translator"]'));
+                } else {
+                    alert("Error resuming project: " + res.error);
+                }
+            } catch (e) {
+                alert("Failed to resume: " + e);
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function deleteLocalProject(hashId, bookName) {
+            if (!confirm(`Are you sure you want to completely delete "${bookName}" and its cached files? This action cannot be undone.`)) {
+                return;
+            }
+            
+            const btn = event.currentTarget;
+            btn.textContent = "🗑 DELETING...";
+            btn.disabled = true;
+
+            try {
+                const res = await eel.delete_local_project(hashId)();
+                if (res.success) {
+                    refreshUserProjects();
+                } else {
+                    alert("Failed to delete project: " + res.error);
+                    btn.textContent = "🗑 DELETE";
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                alert("Request failed: " + e);
+                btn.textContent = "🗑 DELETE";
+                btn.disabled = false;
+            }
+        }
+
+        // Call it right away
+        initAllLanguages();
+
+        // === RIGHT CLICK CONTEXT MENU ===
+        let _lastRightClickedElement = null;
+        
+        document.addEventListener('contextmenu', function(e) {
+            const isImageArea = e.target.closest('#translatorImageArea');
+            const isCodeArea = e.target.closest('.code-area');
+            
+            if (isImageArea || isCodeArea) {
+                e.preventDefault();
+                _lastRightClickedElement = (e.target.tagName === 'IMG' || e.target.tagName === 'TEXTAREA') ? e.target : e.target.querySelector('img') || e.target;
+                
+                const menu = document.getElementById('contextMenu');
+                menu.style.display = 'block';
+                // Keep it on screen
+                let x = e.pageX;
+                let y = e.pageY;
+                if (x + 200 > window.innerWidth) x -= 200;
+                if (y + 100 > window.innerHeight) y -= 100;
+                
+                menu.style.left = x + 'px';
+                menu.style.top = y + 'px';
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('contextMenu');
+            if (menu && menu.style.display === 'block') {
+                menu.style.display = 'none';
+            }
+        });
+
+        // Hover effect for inline styles
+        document.querySelector('.context-item')?.addEventListener('mouseover', function() {
+            this.style.background = 'rgba(255,255,255,0.05)';
+        });
+        document.querySelector('.context-item')?.addEventListener('mouseout', function() {
+            this.style.background = 'transparent';
+        });
+
+        // Context Menu Action
+        function openQuickTranslateModal() {
+            let textToTranslate = "";
+            let isImage = false;
+            let imageSrc = null;
+
+            if (_lastRightClickedElement) {
+                if (_lastRightClickedElement.tagName === 'IMG') {
+                    isImage = true;
+                    imageSrc = _lastRightClickedElement.src;
+                } else if (_lastRightClickedElement.tagName === 'TEXTAREA' || _lastRightClickedElement.classList.contains('code-block')) {
+                    textToTranslate = _lastRightClickedElement.value || _lastRightClickedElement.textContent;
+                }
+            }
+
+            document.getElementById('qtModalBackdrop').style.display = 'block';
+            
+            const qtTab = document.getElementById('tab-quicktranslate');
+            qtTab.classList.add('qt-modal-mode');
+            
+            // Remove the active class from regular tabs to avoid CSS conflicts
+            document.querySelectorAll('.tab-page').forEach(tab => {
+                if(tab.id !== 'tab-quicktranslate') tab.classList.remove('active');
+            });
+            
+            document.getElementById('contextMenu').style.display = 'none';
+
+            if (isImage && imageSrc) {
+                setQTMode('image', document.getElementById('btn-qt-image'));
+                _qtImageBase64 = imageSrc; // direct data URI
+                
+                const ocrOut = document.getElementById('qtOcrOutput');
+                const transOut = document.getElementById('qtImageTransOutput');
+                if (ocrOut) ocrOut.value = "";
+                if (transOut) transOut.value = "";
+                
+                document.getElementById('qtImageStatus').textContent = "Loaded from right-click";
+                document.getElementById('qtImageDropzone').style.borderColor = 'var(--accent-green)';
+                
+                setTimeout(executeQuickTranslate, 300);
+            } else if (textToTranslate) {
+                setQTMode('text', document.getElementById('btn-qt-text'));
+                document.getElementById('qtTextInput').value = textToTranslate;
+                document.getElementById('qtTextCount').textContent = textToTranslate.length + ' chars';
+                
+                setTimeout(executeQuickTranslate, 300);
+            }
+        }
+
+        function closeQuickTranslateModal() {
+            document.getElementById('qtModalBackdrop').style.display = 'none';
+            const qtTab = document.getElementById('tab-quicktranslate');
+            qtTab.classList.remove('qt-modal-mode');
+            
+            // If they were on translator before, ensure it shows again properly if switchTab was active
+            // Actually switchTab logic handles normal routing.
+            // If the modal was above the translator, we don't need to do anything, removing the class hides the modal.
+            // But since tab-quicktranslate might still have display:flex from being shown, we need to strip it if not active
+            const sidebarIcon = document.querySelector('.sidebar-icon[data-tab="quicktranslate"]');
+            if (sidebarIcon && !sidebarIcon.classList.contains('active')) {
+                qtTab.style.display = 'none';
+            }
+        }
+
+    </script>
+
+</body>
+</html>
+

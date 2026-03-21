@@ -12,12 +12,13 @@ import re
 from utils import humanize_error, get_app_path
 
 
-def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translator_src, page_width, current_rtl, tesseract_path):
+def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translator_src, page_width, current_rtl, tesseract_path, fallback_mode=False):
     """Standalone worker for processing a single page in a separate process.
     Reads image directly from file and extracts layout blocks independently."""
     # We re-import inside the worker to ensure process-isolation safety
     import pytesseract
     from PIL import Image
+    Image.MAX_IMAGE_PIXELS = None  # Disable decompression bomb limit for large PDF pages
     import io
     from deep_translator import GoogleTranslator
     import re
@@ -48,6 +49,12 @@ def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translato
     # Helper functions copied/needed inside worker
     def clean_ocr_text(text):
         if not text: return ""
+        # Deep clean: remove hallucinated border/line symbols but keep quotes and bullets
+        text = re.sub(r'[\~\|\_\^\/\\]', ' ', text)
+        # Compress repeated repetitive dots or dashes
+        text = re.sub(r'\.{4,}', '.', text)
+        text = re.sub(r'\-{4,}', '-', text)
+            
         # Preserve double newlines for paragraph structure
         text = re.sub(r'[|\\\/_]', '', text)
         segments = text.split('\n\n')
@@ -111,7 +118,8 @@ def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translato
         blocks = list(page.get_text("blocks"))
         
         # SPRINT 81: High-Res OCR (288 DPI) for better Arabic/Asian detection
-        pix = page.get_pixmap(matrix=fitz.Matrix(4, 4))
+        scale_val = 8 if fallback_mode else 4
+        pix = page.get_pixmap(matrix=fitz.Matrix(scale_val, scale_val))
         worker_log("Pixmap generated.")
         img_bytes = pix.tobytes("png")
         img = Image.open(io.BytesIO(img_bytes))
@@ -168,7 +176,9 @@ def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translato
                 worker_log(f"Script detected: {ocr_lang}")
             
             # SPRINT 81: Dynamic PSM Logic
-            if any(x in ocr_lang for x in ["ara", "heb", "yid"]):
+            if fallback_mode:
+                psm_cfg = '--oem 1 --psm 6' # Try Harder mode: assume uniform block of text
+            elif any(x in ocr_lang for x in ["ara", "heb", "yid"]):
                 psm_cfg = '--oem 1 --psm 6' # Block mode for joined scripts
             elif any(x in ocr_lang for x in ["chi_sim", "jpn", "kor"]):
                 psm_cfg = '--oem 1 --psm 3' # Column/Standard for Asian
