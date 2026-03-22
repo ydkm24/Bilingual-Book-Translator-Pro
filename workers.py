@@ -12,7 +12,7 @@ import re
 from utils import humanize_error, get_app_path
 
 
-def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translator_src, page_width, current_rtl, tesseract_path, fallback_mode=False, ocr_tier="Standard", is_quick_mode=False):
+def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translator_src, page_width, current_rtl, tesseract_path, fallback_mode=False, ocr_tier="Standard", is_quick_mode=False, cache_dir=None):
     """Standalone worker for processing a single page in a separate process.
     Reads image directly from file and extracts layout blocks independently."""
     # We re-import inside the worker to ensure process-isolation safety
@@ -248,7 +248,14 @@ def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translato
         # Save the original image to cache for UI and Cloud Uploads
         img_path = None
         try:
-            cache_dir = get_app_path(os.path.join(".translator_cache", os.path.basename(file_path).replace(".pdf", "")))
+            # SPRINT 104: Use provided cache_dir or fall back to dirname of file if it looks like a cache
+            if not cache_dir:
+                if ".translator_cache" in file_path:
+                    cache_dir = os.path.dirname(file_path)
+                else:
+                    # Legacy fallback logic (Shared)
+                    cache_dir = get_app_path(os.path.join(".translator_cache", os.path.basename(file_path).replace(".pdf", "")))
+            
             os.makedirs(cache_dir, exist_ok=True)
             img_path = os.path.join(cache_dir, f"img_{page_num}.jpg")
             # SPRINT 98: Optimized JPEG cache (85 quality) to avoid 5GB PDFs

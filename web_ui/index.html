@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[PDF_TRANSLATOR_v4.2.0]</title>
+    <title>Panagia.pdf</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script type="text/javascript" src="/eel.js"></script>
@@ -50,25 +50,28 @@
         </aside>
 
         <!-- MAIN WORKSPACE -->
-        <main class="workspace">
+        <main class="workspace" style="position:relative;">
             
             <!-- CUSTOM TITLE BAR -->
             <div class="title-bar">
-                <span class="title-text">[TRANSLATOR_NET_v4.2.0]</span>
+                <span class="title-text">Panagia.pdf</span>
                 <div class="title-bar-right">
-                    <div class="title-notif-btn" onclick="toggleNotifDropdown()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                        <span class="notif-badge">3</span>
+                    <!-- Notification Bell -->
+                    <div class="title-notif-container" id="globalNotifBtn" onclick="toggleNotifDropdown()">
+                        <svg class="title-notif-icon" id="globalNotifIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        <span class="notif-badge" id="globalNotifBadge" style="display:none;"></span>
                     </div>
-                    <span class="title-close">×</span>
-                </div>
+                    <!-- NOTIFICATION DROPDOWN -->
+                    <div class="notif-dropdown" id="notifDropdown" style="display:none; position:absolute; top:32px; right:120px; z-index:9999;">
+                        <div class="notif-dropdown-header">RECENT NOTIFICATIONS</div>
+                        <div class="dash-notif-list" id="dashNotifList">
+                            <div class="status-msg" style="font-size:11px; color:var(--text-muted); padding:12px;">No new notifications</div>
+                        </div>
+                    </div>
                 
-                <!-- NOTIFICATION DROPDOWN -->
-                <div class="notif-dropdown" id="notifDropdown" style="display:none;">
-                    <div class="notif-dropdown-header">RECENT NOTIFICATIONS</div>
-                    <div class="dash-notif-list" id="dashNotifList">
-                        <div class="status-msg" style="font-size:11px; color:var(--text-muted); padding:12px;">No new notifications</div>
-                    </div>
+                    <span class="title-btn" onclick="try{eel.minimize_window()()}catch(e){}">_</span>
+                    <span class="title-btn" id="maxBtn" style="font-size:16px; margin-bottom:2px;" onclick="maximizeApp()">□</span>
+                    <span class="title-btn title-close" onclick="window.close()" title="Close Application">×</span>
                 </div>
             </div>
 
@@ -83,9 +86,10 @@
                             <div class="page-title">DASHBOARD</div>
                             <div class="dash-greeting">Welcome back, <span class="dash-username">Translator</span> — here's your workspace at a glance.</div>
                         </div>
-                        <div class="dash-sys-status">
-                            <span class="sys-dot"></span>
-                            <span>SYS OPERATIONAL</span>
+                        <div class="dash-sys-status-metrics" style="display:flex; gap:16px; font-family:var(--font-mono); font-size:10px; font-weight:700; background:var(--bg-pane); padding:10px 16px; border-radius:4px; border:1px solid var(--border-green); justify-content:center; align-items:center; box-shadow:0 0 10px rgba(0,0,0,0.5);">
+                            <div title="Target Project Load" style="display:flex; align-items:center; gap:6px;"><span class="sys-dot" id="sysEngineDot" style="background:var(--text-muted);"></span> <span id="sysEngineState" style="color:var(--text-muted); display:inline-block; min-width:80px; text-align:left;">ENGINE IDLE</span></div>
+                            <div title="Database Latency" style="display:flex; align-items:center; gap:6px;"><span class="sys-dot" style="background:#f59e0b; animation-duration:2s;"></span> <span id="sysDbLatency" style="color:#fcd34d; display:inline-block; min-width:65px; text-align:left;">PING: --ms</span></div>
+                            <div title="Hardware Usage" style="display:flex; align-items:center; gap:6px;"><span class="sys-dot" style="background:#8b5cf6; animation:none;"></span> <span id="sysHardware" style="color:#ddd; display:inline-block; min-width:145px; text-align:left;">MEM: --MB | CPU: --%</span></div>
                         </div>
                     </div>
 
@@ -128,7 +132,7 @@
                             <div class="dash-stat-info">
                                 <div class="dash-stat-number" id="dashLibraryNumber">—</div>
                                 <div class="dash-stat-label">Library Catalog</div>
-                                <div class="dash-stat-live" id="dashLibraryStatus" style="color:var(--text-green-dim);"><span class="live-dot" style="animation:none;opacity:0.5; background:var(--text-muted);"></span> Indexed</div>
+                                <div class="dash-stat-live" id="dashLibraryStatus" style="color:var(--text-muted);"><span class="live-dot" style="animation:none;opacity:0.5; background:var(--text-muted);"></span> Initializing...</div>
                             </div>
                         </div>
                     </div>
@@ -493,126 +497,195 @@
             <!-- TAB: SOCIAL HUB          -->
             <!-- ======================== -->
             <div class="tab-page" id="tab-social">
-                <div class="page-content social-master-grid">
+                <div class="social-hub-container">
                     
-                    <!-- Left Sidebar (Inbox & Friends) -->
-                    <div class="social-left-col">
-                        <div class="social-action-btn">
-                            <span class="social-btn-icon">➕</span> Add Friend
-                        </div>
-                        
-                        <div class="social-section">
-                            <div class="social-header">INBOX (DIRECT MESSAGES)</div>
-                            <div class="social-inbox-item active">
-                                <div class="inbox-avatar">T</div>
-                                <div class="inbox-info">
-                                    <div class="inbox-name">translator_pro</div>
-                                    <div class="inbox-preview">Thanks! Shared the book...</div>
-                                </div>
-                                <div class="inbox-unread">1</div>
+                    <!-- LEFT SIDEBAR (Navigation & Friends) -->
+                    <div class="social-sidebar">
+                        <div class="social-nav-group">
+                            <div class="social-nav-item active" onclick="switchSocialView('social-inbox', this)">
+                                🔔 <span>Inbox</span> <span class="social-badge" id="socialNavInboxBadge" style="display:none;">0</span>
                             </div>
-                            <div class="social-inbox-item">
-                                <div class="inbox-avatar" style="background:var(--bg-panel); color:var(--text-white);">C</div>
-                                <div class="inbox-info">
-                                    <div class="inbox-name">Cipher_X</div>
-                                    <div class="inbox-preview">Can you help with page 45?</div>
-                                </div>
+                            <div class="social-nav-item" onclick="switchSocialView('social-friends', this)">
+                                👥 <span>Friends</span>
+                            </div>
+                            <div class="social-nav-item" onclick="switchSocialView('social-feed', this)">
+                                📡 <span>Activity Feed</span>
+                            </div>
+                            <div class="social-nav-item" onclick="switchSocialView('social-forums', this)">
+                                💬 <span>Forums</span>
+                            </div>
+                            <div class="social-nav-item" onclick="switchSocialView('social-collab', this)">
+                                🤝 <span>Collab Workspace</span>
                             </div>
                         </div>
 
-                        <div class="social-section" style="flex-grow:1; overflow-y:auto;">
-                            <div class="social-header">NETWORK NODES (FRIENDS)</div>
-                            <div class="social-friend" oncontextmenu="showFriendMenu(event, 'hebrew_scholar')"><span class="live-dot" style="margin-right:8px;"></span> hebrew_scholar</div>
-                            <div class="social-friend" oncontextmenu="showFriendMenu(event, 'dr_translate')"><span class="live-dot" style="margin-right:8px;"></span> dr_translate</div>
-                            <div class="social-friend offline" oncontextmenu="showFriendMenu(event, 'manga_fan_01')"><span class="live-dot" style="margin-right:8px; animation:none; opacity:0.3; background:var(--text-muted);"></span> manga_fan_01</div>
-                            <div class="social-friend offline" oncontextmenu="showFriendMenu(event, 'dostoevsky_fan')"><span class="live-dot" style="margin-right:8px; animation:none; opacity:0.3; background:var(--text-muted);"></span> dostoevsky_fan</div>
+                        <div class="social-header">DIRECT MESSAGES</div>
+                        <div class="social-friends-list" id="socialFriendsList">
+                            <!-- Populated dynamically via JS -->
+                            <div class="status-msg" style="padding:15px; font-size:11px;">Loading friends...</div>
+                        </div>
+                        
+                        <div class="social-sidebar-footer">
+                            <button class="social-action-btn" onclick="openAddFriendModal()">+ Add Friend</button>
                         </div>
                     </div>
 
-                    <!-- Main Area (Tabs + Feed) -->
-                    <div class="social-main-col">
-                        <div class="social-tabs">
-                            <div class="social-tab active" onclick="switchSocialTab('activity', this)">[ ACTIVITY FEED ]</div>
-                            <div class="social-tab" onclick="switchSocialTab('forums', this)">[ FORUMS ]</div>
-                            <div class="social-tab" onclick="switchSocialTab('workspace', this)">[ COLLAB WORKSPACE ]</div>
-                        </div>
+                    <!-- MAIN CONTENT AREA -->
+                    <div class="social-main">
                         
-                        <!-- Activity Feed View -->
-                        <div class="social-view active" id="social-activity">
-                            <div class="activity-card">
-                                <div class="activity-header">
-                                    <div class="activity-avatar">N</div>
-                                    <div class="activity-desc"><span style="color:var(--accent-green);">NetReaver</span> published a new translation</div>
-                                    <div class="activity-time">2h ago</div>
+                        <!-- INBOX VIEW -->
+                        <div class="social-view active" id="social-inbox">
+                            <div class="social-view-header">INBOX // NOTIFICATIONS</div>
+                            <div class="social-view-content" id="socialInboxContent">
+                                <div class="status-msg">No new notifications.</div>
+                            </div>
+                        </div>
+
+                        <div class="social-view" id="social-friends" style="display:none; flex-direction:column; height:100%;">
+                            <div class="social-view-header">FRIENDS // ROSTER</div>
+                            <div class="social-view-content" style="padding:20px; overflow-y:auto; flex:1; justify-content:flex-start; height:auto;">
+                                <div style="margin-bottom:20px; display:flex; gap:10px;">
+                                    <input type="text" id="friendSearch" placeholder="Search friends by name..." 
+                                           style="flex:1; background:rgba(255,255,255,0.05); border:1px solid var(--border-dim); color:var(--text-white); padding:8px 12px; border-radius:6px; font-size:12px;"
+                                           oninput="refreshFullFriendsList(this.value)">
                                 </div>
-                                <div class="activity-body">
-                                    <div class="activity-book-card">
-                                        <div class="book-icon">📚</div>
-                                        <div class="book-info">
-                                            <div class="book-title">Russian Classics Vol. 1</div>
-                                            <div class="book-meta">RU → EN • 542 Pages</div>
+                                <div id="fullFriendsGrid" class="friend-grid">
+                                    <!-- Populated dynamically -->
+                                    <div class="status-msg">Loading friends list...</div>
+                                </div>
+                                
+                                <div id="pendingOutgoingSection" style="margin-top:40px; border-top:1px solid var(--border-dim); padding-top:20px; display:none;">
+                                    <h4 style="color:var(--text-muted); font-size:10px; text-transform:uppercase; margin-bottom:15px; letter-spacing:1px;">Sent Invitations</h4>
+                                    <div id="pendingOutgoingList" style="display:flex; flex-direction:column; gap:10px;">
+                                        <!-- Sent requests go here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FEED VIEW -->
+                        <div class="social-view" id="social-feed" style="display:none; flex-direction:column; height:100%;">
+                            <div class="social-view-header" style="justify-content:space-between; display:flex; align-items:center;">
+                                <div>
+                                    ACTIVITY FEED 
+                                    <span id="feed-status-label" style="font-size:10px; color:var(--text-muted); margin-left:10px;">// GLOBAL</span>
+                                </div>
+                                <div style="display:flex; gap:10px; align-items:center;">
+                                    <!-- Filter -->
+                                    <select id="feedTypeFilter" class="social-filter-select" onchange="refreshSocialFeed()">
+                                        <option value="all">ALL ACTIVITY</option>
+                                        <option value="book_published">BOOKS ONLY</option>
+                                        <option value="milestone">ACHIEVEMENTS</option>
+                                        <option value="patch_note">PATCH NOTES</option>
+                                    </select>
+                                    <div class="feed-toggle-group">
+                                        <button class="feed-toggle-btn active" id="btnFeedGlobal" onclick="setFeedType('global')">GLOBAL</button>
+                                        <button class="feed-toggle-btn" id="btnFeedFriends" onclick="setFeedType('friends')">FRIENDS</button>
+                                    </div>
+                                    <button class="feed-sync-btn" id="feedRefreshBtn" onclick="refreshSocialFeed()" title="Refresh Feed" style="padding: 6px 10px; width: 34px; height: 34px; justify-content: center;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="refresh-progress-bar" id="socialFeedProgressBar"></div>
+                            <div class="social-view-content" id="socialFeedContent" style="padding:20px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:15px; justify-content:flex-start; height:auto;">
+                                <div class="status-msg">Accessing the Neural Stream...</div>
+                            </div>
+                        </div>
+
+                        <!-- FORUMS VIEW -->
+                        <div class="social-view" id="social-forums" style="display:none; flex-direction: column; overflow: hidden;">
+                            <div class="social-view-header" style="justify-content: space-between; display: flex;">
+                                <span>FORUMS // KNOWLEDGE BASE</span>
+                                <div style="display:flex; gap:10px;">
+                                    <div class="search-box" style="width: 200px; padding: 2px 8px;">
+                                        <span class="search-icon" style="font-size:10px;">🔍</span>
+                                        <input type="text" id="forumSearchInput" placeholder="Search topics..." style="font-size:11px;" onkeydown="if(event.key==='Enter') searchForums()">
+                                    </div>
+                                    <button class="social-action-btn" style="width:auto; padding:4px 12px; background:var(--accent-green); color:var(--bg-dark);" onclick="openNewForumModal()">+ NEW FORUM</button>
+                                </div>
+                            </div>
+                            
+                            <div class="forum-layout">
+                                <!-- Sidebar: Filters & Navigation -->
+                                <aside class="forum-sidebar">
+                                    <div class="forum-sidebar-section">
+                                        <div class="section-label">NAVIGATE</div>
+                                        <div class="forum-nav-list">
+                                            <div class="forum-nav-item active" id="forumNavFeed" onclick="switchForumContext('feed')">📡 Neural Stream</div>
+                                            <div class="forum-nav-item" id="forumNavNews" onclick="switchForumContext('news')">📜 News & Updates</div>
+                                            <div class="forum-nav-item" id="forumNavCategories" onclick="switchForumContext('categories')">📁 Categories</div>
+                                            <div class="forum-nav-item" id="forumNavMyForums" onclick="switchForumContext('my-forums')">👤 My Forums</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="forum-sidebar-section">
+                                        <div class="section-label">TRENDING TAGS</div>
+                                        <div id="forumTrendingTags" class="forum-tag-cloud">
+                                            <div class="status-msg">Loading activity...</div>
+                                        </div>
+                                    </div>
+                                </aside>
+
+                                <!-- Main Feed: Topics or Messages -->
+                                <div class="forum-main-stage">
+                                    <!-- TOPIC LIST VIEW (Neural Stream / Search / specific Category) -->
+                                    <div id="forumTopicListView">
+                                        <div id="forumTopicList" class="forum-topic-grid">
+                                            <div class="status-msg">Opening the stream...</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- CATEGORY BROWSER -->
+                                    <div id="forumCategoryBrowser" style="display:none;">
+                                        <div id="forumCategoriesGrid" class="forum-topic-grid">
+                                            <!-- Category cards go here -->
+                                            <div class="status-msg">Loading categories...</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- INDIVIDUAL TOPIC VIEW -->
+                                    <div id="forumTopicMessagesView" style="display:none; flex-direction:column; height: 100%;">
+                                        <div class="forum-topic-header">
+                                            <button class="reader-back-btn" style="margin:0;" onclick="showForumTopicList()">← BACK</button>
+                                            <h3 id="activeTopicTitle" style="margin:0; font-size:16px; color:var(--accent-green);">Topic Title</h3>
+                                            <div id="activeTopicMeta" style="font-size:10px; color:var(--text-muted);">Author • Date</div>
+                                        </div>
+                                        <div id="forumMessagesList" class="forum-messages-scroll">
+                                            <!-- Posts go here -->
+                                        </div>
+                                        <div class="forum-reply-box">
+                                            <textarea id="forumReplyInput" placeholder="Write a reply..."></textarea>
+                                            <button class="social-action-btn" onclick="submitForumReply()">REPLY</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="activity-card">
-                                <div class="activity-header">
-                                    <div class="activity-avatar" style="background:#ef4444;">E</div>
-                                    <div class="activity-desc"><span style="color:var(--accent-green);">Enigma_Zero</span> reached a milestone!</div>
-                                    <div class="activity-time">5h ago</div>
-                                </div>
-                                <div class="activity-body">
-                                    🎯 Translated over 10,000 pages this month using DeepL and Manual verification.
-                                </div>
+                        </div>
+
+                        <!-- COLLAB VIEW -->
+                        <div class="social-view" id="social-collab" style="display:none;">
+                            <div class="social-view-header">ACTIVE WORKSPACES</div>
+                            <div class="social-view-content" id="socialCollabContent">
+                                <div class="status-msg">You have no active collaboration projects.</div>
                             </div>
                         </div>
 
-                        <!-- Forums View -->
-                        <div class="social-view" id="social-forums" style="display:none;">
-                            <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
-                                <button class="footer-btn" style="width:auto; padding:8px 16px;">➕ NEW THREAD</button>
+                        <!-- DM VIEW -->
+                        <div class="social-view" id="social-dm" style="display:none;">
+                            <div class="social-view-header" style="justify-content:space-between; display:flex;">
+                                <div id="dmHeaderName">@Username</div>
+                                <button class="social-action-btn" style="width:auto; padding:4px 12px;" onclick="openFriendProfile()">View Profile</button>
                             </div>
-                            <div class="forum-thread">
-                                <div class="forum-stats">
-                                    <div class="forum-stat">▲ 42</div>
-                                    <div class="forum-stat" style="color:var(--text-muted);">💬 12</div>
-                                </div>
-                                <div class="forum-content">
-                                    <div class="forum-title">Best OCR settings for 19th Century German Fraktur?</div>
-                                    <div class="forum-meta">Posted by <span style="color:var(--accent-green);">historian_99</span> • Technical Help • 3 days ago</div>
-                                </div>
+                            <div class="social-view-content" id="dmMessageHistory" style="display:flex; flex-direction:column;">
+                                <div class="status-msg">Select a friend to start whispering.</div>
                             </div>
-                            <div class="forum-thread">
-                                <div class="forum-stats">
-                                    <div class="forum-stat">▲ 156</div>
-                                    <div class="forum-stat" style="color:var(--text-muted);">💬 89</div>
-                                </div>
-                                <div class="forum-content">
-                                    <div class="forum-title">Megathread: Translating idiomatic expressions (Arabic to English)</div>
-                                    <div class="forum-meta">Posted by <span style="color:var(--accent-green);">dr_translate</span> • General Discussion • 1 week ago</div>
-                                </div>
+                            <div class="dm-input-area">
+                                <input type="text" class="dm-input" id="dmInput" placeholder="Send a message..." disabled>
                             </div>
                         </div>
 
-                        <!-- Workspace View -->
-                        <div class="social-view" id="social-workspace" style="display:none;">
-                            <div class="pr-card">
-                                <div class="pr-header">
-                                    <div class="pr-status open">OPEN</div>
-                                    <div class="pr-title">Review needed: Chapter 4 Medical terminology alignment</div>
-                                </div>
-                                <div class="pr-meta">#42 opened 2 days ago by <span style="color:var(--accent-green);">dr_translate</span> • 5 reviewers requested</div>
-                            </div>
-                            <div class="pr-card">
-                                <div class="pr-header">
-                                    <div class="pr-status merged">MERGED</div>
-                                    <div class="pr-title">Fix formatting on Torah Commentary Page 112</div>
-                                </div>
-                                <div class="pr-meta">#41 merged 5 days ago by <span style="color:var(--accent-green);">hebrew_scholar</span></div>
-                            </div>
-                        </div>
                     </div>
-
                 </div>
             </div>
 
@@ -636,7 +709,14 @@
                     <div class="settings-grid">
                         <div class="settings-section">
                             <div class="section-label">ACCOUNT DETAILS</div>
-                            <div class="setting-row"><span class="setting-name">Username</span><input id="profileViewUsername" class="setting-input" value="TheGoyFather" readonly></div>
+                            <div class="setting-row">
+                                <span class="setting-name">Username</span>
+                                <div style="display:flex; gap:10px; flex:1; justify-content: flex-end;">
+                                    <input id="profileViewUsername" class="setting-input" value="TheGoyFather" readonly style="flex:1; max-width: 300px;">
+                                    <button id="btnEditUsername" class="social-action-btn" style="width:auto; padding:4px 12px;" onclick="toggleUsernameEdit()">✎ EDIT</button>
+                                    <button id="btnSaveUsername" class="social-action-btn" style="width:auto; padding:4px 12px; display:none; background:var(--accent-green); color:var(--bg-dark);" onclick="saveUsernameChange()">✓ SAVE</button>
+                                </div>
+                            </div>
                             <div class="setting-row"><span class="setting-name">Email</span><input id="profileViewEmail" class="setting-input" value="user@example.com" readonly></div>
                             <div class="setting-row"><span class="setting-name">Cloud Status</span><span id="profileCloudStatus" class="setting-value connected">● Connected</span></div>
                         </div>
@@ -645,8 +725,9 @@
                             <div class="setting-row"><span class="setting-name">Plan</span><span class="setting-value connected">PRO TIER</span></div>
                             <div class="setting-row"><span class="setting-name">Cloud Storage</span><span class="setting-value">4.5 GB / 10 GB</span></div>
                         </div>
-                        <div class="settings-section" style="margin-top: 20px;">
+                        <div class="settings-section" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
                             <button class="logout-btn" onclick="handleLogout()">Log Out of TRANSLATOR_NET</button>
+                            <button class="delete-account-btn" onclick="openDeleteAccountModal()">PERMANENTLY DELETE ACCOUNT</button>
                         </div>
                     </div>
                 </div>
@@ -753,6 +834,7 @@
                 <div class="login-field">
                     <label>PASSWORD</label>
                     <input type="password" id="loginPass" class="login-input" placeholder="••••••••••••">
+                    <div style="text-align:right; margin-top:4px;"><a href="#" onclick="showForgotPassword()" style="color:var(--text-muted); font-size:10px; text-decoration:none;">Forgot Password?</a></div>
                 </div>
                 <button class="login-action-btn" onclick="handleLogin()">[ LOG IN ]</button>
             </div>
@@ -773,18 +855,54 @@
                 </div>
                 <button class="login-action-btn" onclick="handleRegister()">[ SIGN UP ]</button>
             </div>
+
+            <div class="login-body" id="otpView" style="display:none;">
+                <div class="status-msg" style="margin-bottom:15px;" id="otpMessage">Verification code sent to your email.</div>
+                <div id="otpError" style="color: #E74C3C; font-size: 11px; margin-bottom: 10px; font-family: var(--font-mono); height: 14px;"></div>
+                <div class="login-field">
+                    <label>OTP Verification Code</label>
+                    <input type="text" id="signupOtp" class="login-input" placeholder="123456" maxlength="8" style="text-align:center; letter-spacing:4px; font-size:18px;">
+                </div>
+                <button class="login-action-btn" onclick="handleVerifySignupOtp()">[ VERIFY && ENTER ]</button>
+                <div style="text-align:center; margin-top:10px;"><a href="#" onclick="handleResendOtp()" style="color:var(--text-muted); font-size:10px; text-decoration:none;">Didn't get a code? Resend</a></div>
+            </div>
+
+            <div class="login-body" id="forgotPassView" style="display:none;">
+                <div class="status-msg" style="margin-bottom:15px;">Enter your email to receive a password reset code.</div>
+                <div id="forgotError" style="color: #E74C3C; font-size: 11px; margin-bottom: 10px; font-family: var(--font-mono); height: 14px;"></div>
+                <div class="login-field">
+                    <label>EMAIL ADDRESS</label>
+                    <input type="text" id="forgotEmail" class="login-input" placeholder="sys_admin@network.local">
+                </div>
+                <button class="login-action-btn" onclick="handleForgotPassword()">[ SEND RESET CODE ]</button>
+                <div style="text-align:center; margin-top:10px;"><a href="#" onclick="setLoginTab('login', document.querySelector('.login-tab'))" style="color:var(--text-muted); font-size:10px; text-decoration:none;">Cancel</a></div>
+            </div>
+
+            <div class="login-body" id="resetPassView" style="display:none;">
+                <div class="status-msg" style="margin-bottom:15px;">Check your email for the recovery code.</div>
+                <div id="resetError" style="color: #E74C3C; font-size: 11px; margin-bottom: 10px; font-family: var(--font-mono); height: 14px;"></div>
+                <div class="login-field">
+                    <label>RECOVERY CODE</label>
+                    <input type="text" id="resetOtp" class="login-input" placeholder="123456" maxlength="8" style="text-align:center; letter-spacing:4px; font-size:18px;">
+                </div>
+                <div class="login-field">
+                    <label>NEW PASSWORD</label>
+                    <input type="password" id="resetNewPass" class="login-input" placeholder="••••••••••••">
+                </div>
+                <button class="login-action-btn" onclick="handleResetPassword()">[ UPDATE PASSWORD ]</button>
+            </div>
         </div>
     </div>
 
-    <!-- ============ AUTHOR PROFILE MODAL (NEURAL SIGNATURE) ============ -->
-    <div class="login-overlay" id="authorProfileModal">
-        <div class="login-modal" style="border-color:var(--accent-green); width:400px;">
+    <!-- ============ NEURAL DOSSIER MODAL (FULL PROFILE) ============ -->
+    <div class="login-overlay" id="neuralDossierModal">
+        <div class="login-modal dossier-modal">
             <div class="login-header">
-                <div class="login-title">🕵️ NEURAL SIGNATURE</div>
-                <div class="login-close" onclick="closeAuthorProfile()">×</div>
+                <div class="login-title">🕵️ NEURAL DOSSIER</div>
+                <div class="login-close" onclick="closeNeuralDossier()">×</div>
             </div>
-            <div class="login-body" id="authorProfileBody" style="align-items:center; text-align:center; padding:30px;">
-                <div class="status-msg">SCANNING NEURAL DATA...</div>
+            <div class="login-body" id="neuralDossierBody">
+                <div class="status-msg">ACCESSING NEURAL STREAM...</div>
             </div>
         </div>
     </div>
@@ -874,6 +992,42 @@
 
 
     <script>
+        // === TOAST SYSTEM (Hacker Theme) ===
+        function showToast(message, type = 'info', duration = 4000) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            toast.innerHTML = `
+                <div class="toast-message">${message}</div>
+                <div class="toast-close" onclick="this.parentElement.classList.add('toast-fade-out'); setTimeout(() => this.parentElement.remove(), 300)">×</div>
+            `;
+            
+            container.appendChild(toast);
+
+            if (duration > 0) {
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.classList.add('toast-fade-out');
+                        setTimeout(() => toast.remove(), 300);
+                    }
+                }, duration);
+            }
+        }
+
+        // Global override for "white box" browser alerts
+        window.alert = function(message) {
+            if (!message) return;
+            let type = 'info';
+            const m = message.toString().toLowerCase();
+            if (m.includes('error') || m.includes('fail') || m.includes('invalid') || m.includes('cannot')) type = 'error';
+            if (m.includes('success') || m.includes('updated') || m.includes('sent') || m.includes('finished')) type = 'success';
+            if (m.includes('warning') || m.includes('caution')) type = 'warning';
+            showToast(message, type);
+        };
+
         // === TAB SWITCHING ===
         // --- LIBRARY & PROJECTS API ---
 
@@ -996,6 +1150,7 @@
                         matchingBooks.forEach(book => {
                             const card = document.createElement('div');
                             card.className = 'library-card';
+                            card.setAttribute('data-id', book.id);
                             card.onclick = () => openLibraryReader(book);
                             
                             // Calculated Metrics
@@ -1015,13 +1170,16 @@
                                 </div>
                                 <div class="lib-info" style="position:relative;">
                                     <span class="lib-title" style="font-size:18px; margin-bottom:6px;">${book.title}</span>
-                                    <span class="lib-author" onclick="openNeuralSignature('${book.owner_id}')" style="cursor:pointer; color:var(--accent-green); text-decoration:underline; font-size:13px;">by ${book.owner_username || 'Architect'}</span>
+                                    <span class="lib-author" onclick="event.stopPropagation(); openNeuralDossier('${book.owner_id}')" style="cursor:pointer; color:var(--accent-green); text-decoration:underline; font-size:13px;">by ${book.owner_username || 'Deleted User'}</span>
                                     
                                     <div class="lib-tags" style="margin-top:8px; height:24px; overflow:hidden;">
                                         ${tags.map(t => `<span style="font-size:10px; background:var(--bg-pane); padding:2px 6px; border-radius:3px; margin-right:4px; border:1px solid var(--border-dim);">#${t}</span>`).join('')}
                                     </div>
 
-                                    <div class="lib-footer" style="display:flex; justify-content:flex-end; align-items:center; margin-top:15px;">
+                                    <div class="lib-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+                                        <button class="footer-btn" onclick="event.stopPropagation(); repostThisBook('${book.id}')" style="width:auto; padding:4px 10px; font-size:10px; border-radius:4px; opacity:0.7;">
+                                            🔄 Repost
+                                        </button>
                                         <button class="pulse-btn ${isFlaming ? 'flaming-pulse' : ''}" onclick="event.stopPropagation(); togglePulse('${book.id}', this)" style="background:var(--bg-panel); border:1px solid var(--border-dim); border-radius:20px; padding:6px 15px; color:var(--text-white); cursor:pointer; font-size:18px; transition:0.3s; display:flex; align-items:center; gap:8px; box-shadow:0 2px 10px rgba(0,0,0,0.3);">
                                             ❤️ <span id="pulse-count-${book.id}" style="font-size:14px; font-family:var(--font-mono); font-weight:700;">${likes}</span>
                                         </button>
@@ -1120,6 +1278,11 @@
                 if (tabId === 'dashboard') refreshDashboard();
                 if (tabId === 'projects') refreshUserProjects();
                 if (tabId === 'library') refreshGlobalLibrary();
+                
+                // Clear social selection when switching AWAY from social OR BACK to social for a fresh start
+                if (tabId !== 'social') {
+                   if (typeof resetSocialView === 'function') resetSocialView();
+                }
             }
         }
 
@@ -1201,6 +1364,9 @@
 
         // === LOGIN MODAL ===
         function openLoginModal() {
+            // Reset to login tab and clear inputs whenever opened
+            const loginTab = document.querySelector('.login-tab'); 
+            setLoginTab('login', loginTab);
             document.getElementById('loginOverlay').classList.add('active');
         }
 
@@ -1209,27 +1375,56 @@
         }
 
         function setLoginTab(tabType, element) {
+            // New Requirement: Clear inputs when switching
+            clearAuthInputs();
+
             // Update active tab styling
             const tabs = document.querySelectorAll('.login-tab');
             tabs.forEach(t => t.classList.remove('active'));
-            element.classList.add('active');
+            if (element) element.classList.add('active');
+
+            // Hide all sub-views first to avoid overlap
+            document.querySelectorAll('.login-body').forEach(b => b.style.display = 'none');
 
             // Show correct view
             if (tabType === 'login') {
                 document.getElementById('loginView').style.display = 'flex';
-                document.getElementById('signupView').style.display = 'none';
-            } else {
+            } else if (tabType === 'signup') {
                 document.getElementById('signupView').style.display = 'flex';
-                document.getElementById('loginView').style.display = 'none';
             }
         }
 
+        function clearAuthInputs() {
+            const ids = [
+                'loginEmail', 'loginPass', 'regEmail', 'regUser', 'regPass', 
+                'signupOtp', 'forgotEmail', 'resetOtp', 'resetNewPass'
+            ];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            // Also clear error labels
+            const errIds = ['loginError', 'signupError', 'otpError', 'forgotError', 'resetError'];
+            errIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '';
+            });
+        }
+
         let _isLoggedIn = false;
+        let _currentUserId = null;
+        let _isSystemAdmin = false;
         let _pendingBookToRead = null;
 
         function updateAuthUI(user) {
-            _isLoggedIn = !!user;
-            const profileBtn = document.getElementById('sidebarProfileBtn');
+                _isLoggedIn = !!user;
+                _currentUserId = user ? user.id : null;
+                _isSystemAdmin = user ? !!user.is_admin : false;
+                
+                // Cache user id for other modules
+                if (user) window._cachedUserId = user.id;
+
+                const profileBtn = document.getElementById('sidebarProfileBtn');
             const dashName = document.querySelector('.dash-username');
             const pUsername = document.getElementById('profileViewUsername');
             const pEmail = document.getElementById('profileViewEmail');
@@ -1252,6 +1447,9 @@
                 // Update Profile Tab Fields
                 if (pUsername) pUsername.value = user.username || 'User';
                 if (pEmail) pEmail.value = user.email || '';
+                
+                const pDisplayName = document.getElementById('profileDisplayName');
+                if (pDisplayName) pDisplayName.textContent = user.username || 'User';
                 
                 const pLargeAvatar = document.getElementById('profileAvatarLarge');
                 if (pLargeAvatar) {
@@ -1282,6 +1480,10 @@
                 // Reset Profile Tab Fields
                 if (pUsername) pUsername.value = "Guest";
                 if (pEmail) pEmail.value = "Not Logged In";
+                
+                const pDisplayName = document.getElementById('profileDisplayName');
+                if (pDisplayName) pDisplayName.textContent = 'Guest';
+                
                 if (pStatus) {
                     pStatus.textContent = "● Offline";
                     pStatus.className = "setting-value disconnected";
@@ -1298,6 +1500,61 @@
                 const b = _pendingBookToRead;
                 _pendingBookToRead = null;
                 setTimeout(() => openLibraryReader(b), 300);
+            }
+        }
+        
+        async function toggleUsernameEdit() {
+            const input = document.getElementById('profileViewUsername');
+            const editBtn = document.getElementById('btnEditUsername');
+            const saveBtn = document.getElementById('btnSaveUsername');
+            
+            if (input.readOnly) {
+                input.readOnly = false;
+                input.style.borderColor = 'var(--accent-green)';
+                input.select();
+                editBtn.style.display = 'none';
+                saveBtn.style.display = 'block';
+            } else {
+                input.readOnly = true;
+                input.style.borderColor = '';
+                editBtn.style.display = 'block';
+                saveBtn.style.display = 'none';
+            }
+        }
+
+        async function saveUsernameChange() {
+            const input = document.getElementById('profileViewUsername');
+            const newName = input.value.trim();
+            
+            if (newName.length < 4) {
+                alert("Username must be at least 4 characters.");
+                return;
+            }
+
+            const saveBtn = document.getElementById('btnSaveUsername');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = '...';
+            saveBtn.disabled = true;
+
+            try {
+                const res = await eel.update_username(newName)();
+                if (res.success) {
+                    // Refresh session/UI
+                    const session = await eel.check_session()();
+                    if (session && session.logged_in) {
+                        updateAuthUI(session);
+                    }
+                    toggleUsernameEdit();
+                    alert("Username updated successfully.");
+                } else {
+                    alert("Update failed: " + res.error);
+                }
+            } catch (err) {
+                console.error("Username update failed:", err);
+                alert("Connection Error: " + err.toString());
+            } finally {
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
             }
         }
 
@@ -1364,7 +1621,47 @@
 
         async function handleLogout() {
             await eel.logout()();
+            clearAuthInputs(); // Reset inputs upon logout
             updateAuthUI(null);
+        }
+
+        function showForgotPassword() {
+            setLoginTab('none', null); // clears active tab highlights
+            document.querySelectorAll('.login-body').forEach(b => b.style.display = 'none');
+            document.getElementById('forgotPassView').style.display = 'flex';
+        }
+
+        async function handleForgotPassword() {
+            const email = document.getElementById('forgotEmail').value;
+            const err = document.getElementById('forgotError');
+            if (!email) { err.textContent = "Please enter your email."; return; }
+            
+            err.textContent = "Sending...";
+            const res = await eel.forgot_password_send_otp(email)();
+            if (res.success) {
+                document.getElementById('forgotPassView').style.display = 'none';
+                document.getElementById('resetPassView').style.display = 'flex';
+            } else {
+                err.textContent = res.error || "Failed to send code.";
+            }
+        }
+
+        async function handleResetPassword() {
+            const email = document.getElementById('forgotEmail').value;
+            const code = document.getElementById('resetOtp').value;
+            const newPass = document.getElementById('resetNewPass').value;
+            const err = document.getElementById('resetError');
+            
+            if (!code || !newPass) { err.textContent = "Fill out all fields."; return; }
+            err.textContent = "Updating password...";
+            
+            const res = await eel.reset_password_with_otp(email, code, newPass)();
+            if (res.success) {
+                alert("Password updated successfully! Please log in.");
+                setLoginTab('login', document.querySelector('.login-tab[onclick*="login"]'));
+            } else {
+                err.textContent = res.error || "Failed to reset password.";
+            }
         }
 
         async function handleRegister() {
@@ -1377,16 +1674,63 @@
                 errorLbl.textContent = "Please fill all fields";
                 return;
             }
+            if (user.trim().length < 4) {
+                errorLbl.textContent = "Username must be at least 4 characters.";
+                return;
+            }
 
             errorLbl.textContent = "Creating account...";
             const res = await eel.register(user, email, pass)();
             
             if (res.success) {
+                if (res.require_otp) {
+                    // Switch to OTP view
+                    document.getElementById('signupView').style.display = 'none';
+                    document.getElementById('otpView').style.display = 'flex';
+                    window._signupEmailCache = email;
+                    window._signupUserCache = user;
+                } else {
+                    // Auto login (No email confirmation required)
+                    updateAuthUI(res.user);
+                    closeLoginModal();
+                    switchTab('profile', document.getElementById('sidebarProfileBtn'));
+                }
+            } else {
+                errorLbl.textContent = res.error || "Signup failed";
+            }
+        }
+
+        async function handleVerifySignupOtp() {
+            const code = document.getElementById('signupOtp').value;
+            const errorLbl = document.getElementById('otpError');
+            if (!code) { errorLbl.textContent = "Enter the code"; return; }
+            
+            errorLbl.textContent = "Verifying...";
+            const email = window._signupEmailCache;
+            const user = window._signupUserCache;
+            
+            const res = await eel.verify_signup_otp(email, code, user)();
+            if (res.success) {
                 updateAuthUI(res.user);
                 closeLoginModal();
                 switchTab('profile', document.getElementById('sidebarProfileBtn'));
             } else {
-                errorLbl.textContent = res.error || "Signup failed";
+                errorLbl.textContent = res.error || "Invalid code";
+            }
+        }
+
+        async function handleResendOtp() {
+            const email = window._signupEmailCache;
+            if (!email) return;
+            const err = document.getElementById('otpError');
+            err.textContent = "Resending...";
+            const res = await eel.resend_signup_otp(email)();
+            if (res.success) {
+                err.textContent = "New code sent!";
+                err.style.color = 'var(--text-green)';
+                setTimeout(() => { err.style.color = '#E74C3C'; err.textContent = ''; }, 3000);
+            } else {
+                err.textContent = res.error || "Failed to resend";
             }
         }
 
@@ -1495,7 +1839,7 @@
 
         async function confirmDeleteProject() {
             const id = document.getElementById('editBookId').value;
-            if (confirm("Permanently delete this project? This cannot be undone.")) {
+            if (await confirm("Permanently delete this project? This cannot be undone.")) {
                 const res = await eel.delete_book(id)();
                 if (res.success) {
                     closeProjectEditModal();
@@ -1537,45 +1881,212 @@
             }
         }
 
-        async function openNeuralSignature(userId) {
-            const modal = document.getElementById('authorProfileModal');
-            const body = document.getElementById('authorProfileBody');
+        async function openNeuralDossier(userId, userHint = '') {
+            const modal = document.getElementById('neuralDossierModal');
+            const body = document.getElementById('neuralDossierBody');
+            if (!modal || !body) return;
+
             modal.classList.add('active');
-            body.innerHTML = '<div class="status-msg">DECRYPTING SIGNATURE...</div>';
             
-            const res = await eel.fetch_author_stats(userId)();
-            if (res.success) {
-                body.innerHTML = `
-                    <div style="display:flex; flex-direction:column; align-items:center;">
-                        <div class="sidebar-avatar" style="width:64px; height:64px; font-size:32px; margin-bottom:15px; border:2px solid var(--accent-green); background:none; color:var(--accent-green); display:flex; align-items:center; justify-content:center; border-radius:50%;">
-                            ${res.username[0].toUpperCase()}
-                        </div>
-                        <div style="font-family:var(--font-mono); color:var(--accent-green); font-weight:700; font-size:18px; margin-bottom:5px;">${res.username.toUpperCase()}</div>
-                        <div style="font-size:11px; color:var(--text-dim); margin-bottom:20px; font-family:var(--font-mono); line-height:1.4;">${res.bio.toUpperCase()}</div>
-                        
-                        <div style="display:flex; gap:30px; justify-content:center; width:100%; border-top:1px solid var(--border-dim); padding-top:20px;">
-                            <div style="text-align:center;">
-                                <div style="font-size:24px; color:var(--text-white); font-weight:700; font-family:var(--font-mono);">${res.stats.contributions}</div>
-                                <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Harvests</div>
-                            </div>
-                            <div style="text-align:center;">
-                                <div style="font-size:24px; color:var(--accent-green); font-weight:700; font-family:var(--font-mono);">${res.stats.reputation}</div>
-                                <div style="font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Resonance</div>
-                            </div>
-                        </div>
+            // Show skeleton with hint if available
+            body.innerHTML = `
+                <div class="dossier-container skeleton">
+                    <div class="dossier-header" style="opacity:0.5;">
+                        <div class="sidebar-avatar" style="width:80px; height:80px; font-size:40px; margin-bottom:10px; border:2px solid var(--border-dim); opacity:0.3;">${userHint ? userHint[0].toUpperCase() : '?'}</div>
+                        <div class="dossier-name">${userHint ? userHint.toUpperCase() : 'LOADING...'}</div>
+                        <div class="status-msg" style="padding:0; margin-top:20px;">[ ACCESSING NEURAL DOSSIER... ]</div>
                     </div>
-                `;
-            } else {
-                body.innerHTML = `<div class="status-msg error">${res.error}</div>`;
+                </div>
+            `;
+
+            try {
+                // Ensure we know who WE are to hide friend buttons on ourselves
+                if (!window._cachedUserId) {
+                    const session = await eel.check_session()();
+                    if (session) window._cachedUserId = session.id;
+                }
+
+                const res = await eel.get_detailed_profile(userId)();
+                if (res.success) {
+                    const p = res.profile;
+                    const r = res.relationship;
+                    
+                    // Connection status color
+                    let statusColor = '#94a3b8'; // Offline (Gray)
+                    let statusText = 'OFFLINE';
+                    if (p.last_seen) {
+                        const lastSeenDate = new Date(p.last_seen);
+                        const diffMins = (new Date() - lastSeenDate) / 60000;
+                        if (diffMins < 5) {
+                            statusColor = 'var(--accent-green)'; // Online
+                            statusText = 'ONLINE';
+                        } else if (diffMins < 15) {
+                            statusColor = '#e67e22'; // Away
+                            statusText = 'AWAY';
+                        }
+                    }
+
+                    // Build Relationship Button
+                    let relBtnHtml = '';
+                    if (userId !== window._cachedUserId) { // Don't show for self
+                        if (r.status === 'none') {
+                            relBtnHtml = `<button class="dossier-action-btn primary" onclick="handleRelationshipAction('${userId}', 'add')">➕ ADD FRIEND</button>`;
+                        } else if (r.status === 'pending_sent') {
+                            relBtnHtml = `<button class="dossier-action-btn warn" onclick="handleRelationshipAction('${userId}', 'cancel')">⏳ PENDING (CLICK TO ABORT)</button>`;
+                        } else if (r.status === 'pending_received') {
+                            relBtnHtml = `<button class="dossier-action-btn primary" onclick="handleRelationshipAction('${userId}', 'accept')">👤 ACCEPT REQUEST</button>`;
+                        } else if (r.status === 'friend') {
+                            relBtnHtml = `
+                                <div style="display:flex; gap:10px; width:100%;">
+                                    <button class="dossier-action-btn success" style="flex:1;" onclick="handleRelationshipAction('${userId}', 'remove')">✅ FRIEND (REMOVE?)</button>
+                                    <button class="dossier-action-btn icon-only" title="Send Message" onclick="closeNeuralDossier(); openDmChat({id:'${userId}', username:'${p.username}'})">✉️</button>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    body.innerHTML = `
+                        <div class="dossier-container">
+                            <div class="dossier-header">
+                                <div class="dossier-avatar-container">
+                                    <div class="dossier-avatar-pulse" style="border-color:${statusColor}; box-shadow: 0 0 15px ${statusColor}44;">
+                                        ${p.avatar_url ? `
+                                            <div class="sidebar-avatar" style="width:80px; height:80px; background-image:url('${p.avatar_url}'); background-size:cover; background-position:center; border:2px solid ${statusColor}; border-radius:50%;"></div>
+                                        ` : `
+                                            <div class="sidebar-avatar" style="width:80px; height:80px; font-size:40px; background:var(--bg-panel); border:2px solid ${statusColor}; color:${statusColor}; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                                                ${p.username[0].toUpperCase()}
+                                            </div>
+                                        `}
+                                    </div>
+                                    <div class="dossier-status-pill" style="background:${statusColor}">${statusText}</div>
+                                </div>
+                                <div class="dossier-name">${p.username.toUpperCase()}</div>
+                                <div class="dossier-bio">${p.bio.toUpperCase()}</div>
+                            </div>
+
+                            <div class="dossier-stats-row">
+                                <div class="dossier-stat-card">
+                                    <div class="dossier-stat-val">${p.books_published}</div>
+                                    <div class="dossier-stat-lbl">BOOKS PUBLISHED</div>
+                                </div>
+                                <div class="dossier-stat-card">
+                                    <div class="dossier-stat-val">${p.pages_translated.toLocaleString()}</div>
+                                    <div class="dossier-stat-lbl">PAGES TRANSLATED</div>
+                                </div>
+                            </div>
+
+                            <div class="dossier-actions">
+                                ${relBtnHtml}
+                            </div>
+
+                            ${p.recent_books.length > 0 ? `
+                                <div class="dossier-books-section">
+                                    <div class="dossier-section-title">RECENT PUBLICATIONS</div>
+                                    <div class="dossier-books-grid">
+                                        ${p.recent_books.map(b => `
+                                            <div class="dossier-book-mini" onclick="closeNeuralDossier(); viewGlobalBook('${b.id}')">
+                                                <div class="mini-cover">📕</div>
+                                                <div class="mini-title">${b.title}</div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    body.innerHTML = `<div class="status-msg Error">${res.error}</div>`;
+                }
+            } catch (err) {
+                console.error("Dossier access failed:", err);
+                body.innerHTML = '<div class="status-msg Error">NEURAL LINK TIMEOUT</div>';
             }
         }
 
-        function closeAuthorProfile() {
-            document.getElementById('authorProfileModal').classList.remove('active');
+        function closeNeuralDossier() {
+            document.getElementById('neuralDossierModal').classList.remove('active');
         }
+
+        function viewGlobalBook(bookId) {
+            closeNeuralDossier();
+            switchTab('library', document.querySelector('[data-tab=library]'));
+            
+            setTimeout(async () => {
+                if (typeof refreshGlobalLibrary === 'function') {
+                    await refreshGlobalLibrary();
+                    const card = document.querySelector(`.library-card[data-id="${bookId}"]`);
+                    if (card) {
+                        // Open parent details if it's an accordion
+                        const details = card.closest('details');
+                        if (details) details.open = true;
+                        
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        card.style.transition = '0.5s';
+                        card.style.boxShadow = '0 0 40px var(--accent-green)';
+                        card.style.borderColor = 'var(--accent-green)';
+                        card.style.transform = 'scale(1.05)';
+                        setTimeout(() => {
+                           card.style.boxShadow = '';
+                           card.style.borderColor = '';
+                           card.style.transform = '';
+                        }, 3000);
+                    }
+                }
+            }, 800);
+        }
+
+        async function handleRelationshipAction(targetId, action) {
+            try {
+                let res;
+                if (action === 'add') {
+                    res = await eel.send_friend_request(targetId)();
+                } else if (action === 'cancel') {
+                    res = await eel.cancel_friend_request_by_target(targetId)();
+                } else if (action === 'remove') {
+                    const isConfirmed = await confirm("Sever neural link with this user?");
+                    if (!isConfirmed) return; 
+                    res = await eel.remove_friend_by_id(targetId)();
+                } else if (action === 'accept') {
+                    // Logic for accepting from dossier specifically if needed
+                    // For now, let's just use the add logic or a dedicated accept
+                    showToast("Please accept from your Inbox for now.", "info");
+                    return;
+                }
+
+                if (res && res.success) {
+                    showToast("Neural link updated", "success");
+                    openNeuralDossier(targetId); // Refresh dossier
+                    if (window.refreshFullFriendsList) refreshFullFriendsList();
+                } else {
+                    showToast(res?.error || "Action failed", "error");
+                }
+            } catch (err) {
+                showToast("Connection error", "error");
+            }
+        }
+        function updateNotificationBell(count) {
+            const badge = document.getElementById('globalNotifBadge');
+            const icon = document.getElementById('globalNotifIcon');
+            if (!badge || !icon) return;
+            
+            if (count > 0) {
+                badge.textContent = count;
+                badge.style.display = 'flex';
+                icon.classList.add('has-notifs');
+            } else {
+                badge.style.display = 'none';
+                icon.classList.remove('has-notifs');
+            }
+        }
+
         function toggleNotifDropdown() {
             const dropdown = document.getElementById('notifDropdown');
-            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            const isShowing = dropdown.style.display === 'none';
+            dropdown.style.display = isShowing ? 'block' : 'none';
+            if (isShowing) {
+                refreshDashboardNotifications();
+                try { updateNotificationBell(0); } catch(e) {}
+            }
         }
 
         function openSocialHub() {
@@ -1586,20 +2097,1009 @@
             if (socialBtn) switchTab('social', socialBtn);
         }
 
-        // === SOCIAL HUB TABS ===
-        function switchSocialTab(viewId, element) {
-            // Update active tab styling
-            const tabs = document.querySelectorAll('.social-tab');
-            tabs.forEach(t => t.classList.remove('active'));
-            element.classList.add('active');
+        // === SOCIAL HUB JS (PHASE 1) ===
+        async function switchSocialView(viewId, btnElement) {
+            _currentSocialView = viewId;
+            
+            // Update inner nav highlighting (Mutex with Friends list)
+            const allNavs = document.querySelectorAll('.social-nav-tab, .social-nav-item');
+            allNavs.forEach(b => b.classList.remove('active'));
+            
+            // ALSO clear DM selections when switching to a main sub-view
+            document.querySelectorAll('.social-friend-item').forEach(b => b.classList.remove('active'));
+            _currentDmFriendId = null;
+            _currentDmFriendRelId = null;
+            
+            if (btnElement) {
+                btnElement.classList.add('active');
+            } else {
+                // Try to find the button programmatically if null
+                const autoBtn = document.querySelector(`.social-nav-tab[onclick*="${viewId}"], .social-nav-item[onclick*="${viewId}"]`);
+                if (autoBtn) autoBtn.classList.add('active');
+            }
 
             // Hide all views
             document.querySelectorAll('.social-view').forEach(v => v.style.display = 'none');
             
-            // Show targeted view
-            const target = document.getElementById('social-' + viewId);
-            if (target) target.style.display = 'flex';
+            // Show target view
+            const target = document.getElementById(viewId);
+            if (target) {
+                target.style.display = 'flex';
+                if (viewId === 'social-inbox') refreshInbox();
+                if (viewId === 'social-friends') {
+                    refreshFullFriendsList();
+                    refreshPendingOutgoing();
+                }
+                if (viewId === 'social-feed') {
+                    const feedContent = document.getElementById('socialFeedContent');
+                    if (!feedContent || feedContent.children.length <= 1) {
+                        refreshSocialFeed();
+                    }
+                }
+                if (viewId === 'social-forums') {
+                    switchForumContext('feed');
+                    refreshTrendingTags();
+                }
+            }
         }
+
+        function openAddFriendModal() {
+            // Build and show the Add Friend search modal
+            const existing = document.getElementById('addFriendModal');
+            if (existing) existing.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'addFriendModal';
+            modal.className = 'login-overlay active';
+            modal.innerHTML = `
+                <div class="login-modal" style="width:420px;">
+                    <div class="login-header">
+                        <div class="login-title">👥 ADD FRIEND</div>
+                        <div class="login-close" onclick="document.getElementById('addFriendModal').remove()">×</div>
+                    </div>
+                    <div class="login-body">
+                        <div class="login-field">
+                            <label>SEARCH BY USERNAME</label>
+                            <input type="text" id="friendSearchInput" class="login-input" placeholder="Type a username..." oninput="debounceFriendSearch(this.value)">
+                        </div>
+                        <div id="friendSearchResults" style="max-height:250px; overflow-y:auto; margin-top:10px;">
+                            <div class="status-msg" style="font-size:11px;">Type at least 4 characters to search...</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.getElementById('friendSearchInput').focus();
+        }
+
+        let _friendSearchTimer;
+        function debounceFriendSearch(query) {
+            clearTimeout(_friendSearchTimer);
+            if (query.length < 4) {
+                document.getElementById('friendSearchResults').innerHTML = '<div class="status-msg" style="font-size:11px;">Type at least 4 characters to search...</div>';
+                return;
+            }
+            _friendSearchTimer = setTimeout(() => doFriendSearch(query), 300);
+        }
+
+        async function doFriendSearch(query) {
+            const container = document.getElementById('friendSearchResults');
+            container.innerHTML = '<div class="status-msg" style="font-size:11px;">Searching...</div>';
+            const res = await eel.search_users(query)();
+            if (!res.success || !res.users.length) {
+                container.innerHTML = '<div class="status-msg" style="font-size:11px;">No users found.</div>';
+                return;
+            }
+            container.innerHTML = '';
+            res.users.forEach(u => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:10px; border-bottom:1px solid var(--border-dim);';
+                const initial = u.username ? u.username[0].toUpperCase() : '?';
+                row.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div class="sidebar-avatar" style="width:32px; height:32px; font-size:14px; flex-shrink:0;">${initial}</div>
+                        <span style="color:var(--text-white); font-family:var(--font-mono); font-size:13px;">${u.username}</span>
+                    </div>
+                    <button onclick="sendFriendReq('${u.id}', this)" style="background:rgba(74,222,128,0.1); border:1px solid var(--accent-green); color:var(--accent-green); padding:4px 12px; border-radius:4px; cursor:pointer; font-family:var(--font-mono); font-size:10px; font-weight:700;">+ ADD</button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        async function sendFriendReq(userId, btn) {
+            btn.disabled = true;
+            btn.textContent = '...';
+            const res = await eel.send_friend_request(userId)();
+            if (res.success) {
+                btn.textContent = '✓ SENT';
+                btn.style.borderColor = 'var(--text-muted)';
+                btn.style.color = 'var(--text-muted)';
+            } else {
+                btn.textContent = res.error || 'Error';
+                btn.style.color = '#ef4444';
+                btn.style.borderColor = '#ef4444';
+            }
+        }
+
+        // === FRIENDS LIST RENDERING ===
+        let _currentDmFriendId = null;
+        let _currentDmFriendRelId = null;
+
+        async function refreshFriendsList() {
+            const list = document.getElementById('socialFriendsList');
+            if (!list) return;
+            
+            const res = await eel.get_friends_list()();
+            const unreadRes = await eel.get_dm_unread_counts()() || {counts:{}};
+            const unreadCounts = unreadRes.counts || {};
+
+            if (!res.friends || res.friends.length === 0) {
+                list.innerHTML = '<div class="status-msg" style="padding:15px; font-size:11px;">No friends yet. Click "+ Add Friend" below!</div>';
+                // Also clear the full grid if it's there
+                const grid = document.getElementById('fullFriendsGrid');
+                if (grid) grid.innerHTML = '<div class="status-msg">You haven\'t added any friends yet.</div>';
+                return;
+            }
+
+            list.innerHTML = '';
+            res.friends.forEach(f => {
+                const item = document.createElement('div');
+                item.className = 'social-friend-item' + (_currentDmFriendRelId === f.rel_id ? ' active' : '');
+                const unread = unreadCounts[f.id] || 0;
+                item.innerHTML = `
+                    <span class="social-dot ${f.status}"></span>
+                    <span style="flex:1; font-size:13px; font-family:var(--font-mono);">${f.username}</span>
+                    ${unread > 0 ? `<span class="social-badge">${unread}</span>` : ''}
+                `;
+                item.onclick = () => openDmChat(f);
+                item.oncontextmenu = (e) => showFriendContextMenu(e, f);
+                list.appendChild(item);
+            });
+        }
+
+        async function refreshFullFriendsList(filterText = '') {
+            const grid = document.getElementById('fullFriendsGrid');
+            if (!grid) return;
+            
+            try {
+                const res = await eel.get_friends_list()();
+                if (!res.friends || res.friends.length === 0) {
+                    grid.innerHTML = '<div class="status-msg">You haven\'t added any friends yet.</div>';
+                    return;
+                }
+
+                const term = filterText.toLowerCase();
+                const filtered = res.friends.filter(f => f.username.toLowerCase().includes(term));
+                
+                if (filtered.length === 0) {
+                    grid.innerHTML = '<div class="status-msg">No friends match your search.</div>';
+                    return;
+                }
+
+                grid.innerHTML = '';
+                filtered.forEach(f => {
+                    const card = document.createElement('div');
+                    card.className = 'friend-card';
+                    card.style.display = 'flex'; // Ensure visible
+                    const initial = f.username ? f.username[0].toUpperCase() : '?';
+                    const avatarStyle = f.avatar_url ? `style="background-image:url('${f.avatar_url}')"` : '';
+                    
+                    card.innerHTML = `
+                        <div class="friend-card-avatar" ${avatarStyle}>
+                            ${!f.avatar_url ? initial : ''}
+                            <span class="friend-card-status ${f.status}"></span>
+                        </div>
+                        <div class="friend-card-name">${f.username}</div>
+                        <div class="friend-card-meta">${f.status.toUpperCase()}</div>
+                        <div class="friend-card-actions">
+                            <button class="friend-card-btn primary" onclick="openDmChat({id:'${f.id}',username:'${f.username}',status:'${f.status}',rel_id:'${f.rel_id}'})">MESSAGE</button>
+                            <button class="friend-card-btn" onclick="openNeuralDossier('${f.id}', '${f.username}')">PROFILE</button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                console.error("Full Friends List Error:", err);
+                grid.innerHTML = '<div class="status-msg error">System error loading friends roster.</div>';
+            }
+        }
+
+        async function refreshPendingOutgoing() {
+            const section = document.getElementById('pendingOutgoingSection');
+            const list = document.getElementById('pendingOutgoingList');
+            if (!section || !list) return;
+
+            const res = await eel.get_pending_outgoing()();
+            if (res.success && res.requests.length > 0) {
+                section.style.display = 'block';
+                list.innerHTML = '';
+                res.requests.forEach(r => {
+                    const item = document.createElement('div');
+                    item.className = 'pending-outgoing-item';
+                    const timeAgo = (typeof getTimeAgo === 'function') ? getTimeAgo(new Date(r.created_at).getTime()) : 'recently';
+                    item.innerHTML = `
+                        <div class="pending-outgoing-info">
+                            <div class="pending-outgoing-user">Request to @${r.receiver_username}</div>
+                            <div class="pending-outgoing-time">Sent ${timeAgo}</div>
+                        </div>
+                        <button class="social-action-btn" style="width:auto; padding:4px 8px; font-size:9px;" onclick="cancelSentRequest('${r.id}')">Cancel</button>
+                    `;
+                    list.appendChild(item);
+                });
+            } else {
+                section.style.display = 'none';
+            }
+        }
+
+        async function cancelSentRequest(requestId) {
+            const confirmed = await window.confirm("Cancel this friend request?");
+            if (confirmed) {
+                const res = await eel.cancel_friend_request(requestId)();
+                if (res.success) {
+                    refreshPendingOutgoing();
+                } else {
+                    alert("Error: " + res.error);
+                }
+            }
+        }
+
+        function showFriendContextMenu(e, friend) {
+            e.preventDefault();
+            const existing = document.getElementById('socialFriendCtx');
+            if (existing) existing.remove();
+
+            const menu = document.createElement('div');
+            menu.id = 'socialFriendCtx';
+            menu.style.cssText = `position:fixed; left:${e.clientX}px; top:${e.clientY}px; background:var(--bg-panel); border:1px solid var(--border-dim); border-radius:6px; padding:6px; z-index:9999; min-width:160px;`;
+            const isDeleted = friend.username.includes('Deleted User');
+            
+            if (isDeleted) {
+                menu.innerHTML = `
+                    <div style="padding:8px 12px; color:#ef4444; cursor:pointer; font-size:12px; font-family:var(--font-mono);" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" onclick="confirmRemoveFriend('${friend.id}','${friend.username}','${friend.rel_id}')">✕ Delete Chat</div>
+                `;
+            } else {
+                menu.innerHTML = `
+                    <div style="padding:8px 12px; color:var(--text-white); cursor:pointer; font-size:12px; font-family:var(--font-mono);" onclick="viewFriendProfile('${friend.id}')">👤 View Profile</div>
+                    <div style="padding:8px 12px; color:var(--text-white); cursor:pointer; font-size:12px; font-family:var(--font-mono);" onclick="openDmChat({id:'${friend.id}',username:'${friend.username}',status:'${friend.status}',rel_id:'${friend.rel_id}'})">💬 Message</div>
+                    <div style="height:1px; background:var(--border-dim); margin:4px 0;"></div>
+                    <div style="padding:8px 12px; color:#ef4444; cursor:pointer; font-size:12px; font-family:var(--font-mono);" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" onclick="confirmRemoveFriend('${friend.id}','${friend.username}','${friend.rel_id}')">✕ Remove Friend</div>
+                `;
+            }
+            document.body.appendChild(menu);
+            setTimeout(() => document.addEventListener('click', () => { menu.remove(); }, { once: true }), 50);
+        }
+
+        async function confirmRemoveFriend(friendId, username, relId) {
+            const cleanRelId = (relId === 'undefined' || !relId) ? null : relId;
+            const cleanFriendId = (friendId === 'null' || !friendId) ? null : friendId;
+            const isDeleted = username.includes('Deleted User');
+            const msg = isDeleted ? `Delete chat history with ${username}? This cannot be undone.` : `Remove ${username} from your friends?`;
+            
+            if (await confirm(msg)) {
+                await eel.remove_friend(cleanFriendId, cleanRelId)();
+                refreshFriendsList();
+                if (_currentDmFriendRelId === cleanRelId) {
+                    _currentDmFriendId = null;
+                    _currentDmFriendRelId = null;
+                    document.getElementById('social-dm').style.display = 'none';
+                    document.getElementById('social-home').style.display = 'block';
+                }
+            }
+        }
+
+        function resetSocialView() {
+            _currentDmFriendId = null;
+            _currentDmFriendRelId = null;
+            document.querySelectorAll('.social-friend-item').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.social-nav-item').forEach(b => b.classList.remove('active'));
+            
+            const home = document.getElementById('social-home');
+            const dm = document.getElementById('social-dm');
+            if (home) home.style.display = 'block';
+            if (dm) dm.style.display = 'none';
+        }
+
+        // === DM CHAT ===
+        async function openDmChat(friend) {
+            _currentDmFriendId = friend.id;
+            _currentDmFriendRelId = friend.rel_id;
+            
+            // 1. Instant UI Switch (Mutex with social sub-tabs)
+            document.querySelectorAll('.social-nav-tab, .social-nav-item').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.social-friend-item').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.social-view').forEach(v => v.style.display = 'none');
+            document.getElementById('social-dm').style.display = 'flex';
+            
+            // 2. Instant Header & Input Setup
+            document.getElementById('dmHeaderName').textContent = `@${friend.username}`;
+            const input = document.getElementById('dmInput');
+            const isDeleted = friend.username.includes('Deleted User');
+            input.disabled = isDeleted;
+            input.value = '';
+            input.placeholder = isDeleted ? `You cannot message a deleted user.` : `Message @${friend.username}...`;
+            input.onkeydown = async (e) => {
+                if (e.key === 'Enter' && input.value.trim()) {
+                    const content = input.value.trim();
+                    input.value = '';
+                    await eel.send_dm(friend.id, content)();
+                    loadDmMessages(friend.id);
+                }
+            };
+            
+            // 3. Clear List with Loading State
+            const list = document.getElementById('dmMessageHistory');
+            list.innerHTML = '<div style="flex:1; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:11px; font-family:var(--font-mono); height:100%;">[ ESTABLISHING SECURE CHANNEL... ]</div>';
+
+            // 4. Update Sidebar in Background
+            refreshFriendsList();
+
+            // 5. Fetch Data (Parallel) with timeout/error safety
+            Promise.all([
+                eel.mark_dms_read(friend.id)(),
+                loadDmMessages(friend.id)
+            ]).then(() => {
+                refreshFriendsList(); // refresh unread badges
+            });
+        }
+
+        async function loadDmMessages(friendId) {
+            const container = document.getElementById('dmMessageHistory');
+            // Optimistic: don't wait for session if we already have it
+            if (!window._cachedUserId) {
+                const session = await eel.check_session()();
+                if (session) window._cachedUserId = session.id;
+            }
+            
+            const res = await eel.get_dm_history(friendId)();
+
+            if (!res.messages || res.messages.length === 0) {
+                container.innerHTML = '<div class="status-msg">No messages yet. Say hello!</div>';
+                return;
+            }
+
+            const currentUserId = window._cachedUserId;
+            const fragment = document.createDocumentFragment();
+            
+            res.messages.forEach(msg => {
+                const isMine = msg.sender_id === currentUserId;
+                let sender = msg.profiles || {};
+                if (Array.isArray(sender)) sender = sender[0] || {};
+                
+                const username = isMine ? "You" : (sender.username || "Deleted User");
+                const avatar = sender.avatar_url;
+                const initial = username[0].toUpperCase();
+                const timeStr = new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                
+                const msgItem = document.createElement('div');
+                msgItem.className = 'dm-message-item';
+                msgItem.id = `dm-msg-${msg.id}`;
+                
+                let avatarHtml = `<div class="dm-avatar">${initial}</div>`;
+                if (avatar) {
+                    avatarHtml = `<div class="dm-avatar" style="background-image: url('${avatar}')"></div>`;
+                }
+
+                let actionsHtml = '';
+                if (isMine) {
+                    actionsHtml = `
+                        <div class="dm-actions">
+                            <div class="dm-action-btn" title="Edit" onclick="startEditDm('${msg.id}')">✎</div>
+                            <div class="dm-action-btn delete" title="Delete" onclick="handleDeleteDm('${msg.id}')">✕</div>
+                        </div>
+                    `;
+                }
+
+                msgItem.innerHTML = `
+                    ${avatarHtml}
+                    <div class="dm-content-wrapper">
+                        <div class="dm-header">
+                            <span class="dm-user">${username}</span>
+                            <span class="dm-time">${timeStr}</span>
+                            ${msg.updated_at && msg.updated_at !== msg.created_at ? '<span class="dm-edited">(edited)</span>' : ''}
+                        </div>
+                        <div class="dm-text" id="dm-text-${msg.id}">${msg.content}</div>
+                        ${actionsHtml}
+                    </div>
+                `;
+                fragment.appendChild(msgItem);
+            });
+
+            // Final atomic update to prevent flicker
+            container.replaceChildren(fragment);
+            container.scrollTop = container.scrollHeight;
+        }
+
+
+        // --- CUSTOM CONFIRM MODAL ---
+        window.confirm = (message) => {
+            // Since eel/JS doesn't wait for a custom modal normally, 
+            // we have to rewrite part of the logic or just use a promise-based one.
+            // But for now, I'll provide a real themed modal that works with callbacks.
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'login-overlay active';
+                modal.style.zIndex = '20000';
+                modal.innerHTML = `
+                    <div class="login-card" style="width:340px; text-align:center;">
+                        <h3 style="color:var(--accent-green); margin-bottom:15px;">CONFIRM ACTION</h3>
+                        <p style="font-size:13px; color:var(--text-white); margin-bottom:20px;">${message}</p>
+                        <div style="display:flex; gap:10px; justify-content:center;">
+                            <button class="login-action-btn" id="confirm-ok" style="width:100px;">OK</button>
+                            <button class="login-action-btn logout" id="confirm-cancel" style="width:100px; background:transparent;">CANCEL</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                modal.querySelector('#confirm-ok').onclick = () => { modal.remove(); resolve(true); };
+                modal.querySelector('#confirm-cancel').onclick = () => { modal.remove(); resolve(false); };
+            });
+        };
+
+        async function startEditDm(msgId) {
+            const textEl = document.getElementById(`dm-text-${msgId}`);
+            if (!textEl) return;
+            const originalContent = textEl.innerText;
+            if (textEl.querySelector('input')) return;
+
+            // Compact Seamless Edit: Minimal gap, single line
+            textEl.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:2px; padding:0;">
+                    <input type="text" class="dm-ghost-input" id="edit-input-${msgId}" value="${originalContent}">
+                    <div class="dm-edit-hint">
+                        escape to <b class="cancel" onclick="cancelEditDm('${msgId}', '${originalContent.replace(/'/g, "\\'")}')">cancel</b> • 
+                        enter to <b onclick="saveEditDm('${msgId}')">save</b>
+                    </div>
+                </div>
+            `;
+            
+            const input = document.getElementById(`edit-input-${msgId}`);
+            input.focus();
+            input.select();
+            
+            input.onkeydown = async (e) => {
+                if (e.key === 'Escape') cancelEditDm(msgId, originalContent);
+                else if (e.key === 'Enter') saveEditDm(msgId);
+            };
+        }
+
+
+
+
+        function cancelEditDm(msgId, originalContent) {
+            const textEl = document.getElementById(`dm-text-${msgId}`);
+            if (textEl) textEl.innerText = originalContent;
+        }
+
+        async function saveEditDm(msgId) {
+            const input = document.getElementById(`edit-input-${msgId}`);
+            const textEl = document.getElementById(`dm-text-${msgId}`);
+            if (!input || !textEl) return;
+            
+            const newContent = input.value.trim();
+            if (!newContent) return;
+            
+            const res = await eel.edit_dm(msgId, newContent)();
+            if (res.success) {
+                textEl.innerText = newContent;
+                const header = textEl.parentElement.querySelector('.dm-header');
+                if (header && !header.querySelector('.dm-edited')) {
+                    const badge = document.createElement('span');
+                    badge.className = 'dm-edited';
+                    badge.textContent = '(edited)';
+                    header.appendChild(badge);
+                }
+            } else {
+                alert("Edit failed: " + res.error);
+                // On error, we keep the input so user doesn't lose their typed text
+            }
+        }
+
+        async function handleDeleteDm(msgId) {
+            const confirmed = await window.confirm("Permanently delete this message?");
+            if (confirmed) {
+                const res = await eel.delete_dm(msgId)();
+                if (res.success) {
+                    const el = document.getElementById(`dm-msg-${msgId}`);
+                    if (el) {
+                        el.classList.add('deleting'); // Trigger smooth CSS collapse
+                        setTimeout(() => el.remove(), 350); // Remove after animation
+                    }
+                } else {
+                    alert("Delete failed: " + res.error);
+                }
+            }
+        }
+
+
+        async function viewFriendProfile(userId) {
+            openNeuralDossier(userId);
+        }
+
+        function openFriendProfile() {
+            if (typeof _currentDmFriendId !== 'undefined' && _currentDmFriendId) openNeuralDossier(_currentDmFriendId);
+        }
+
+        // === INBOX RENDERING (PHASE 4) ===
+        async function refreshInbox() {
+            const container = document.getElementById('socialInboxContent');
+            if (!container) return;
+            container.innerHTML = '<div class="status-msg">Loading inbox...</div>';
+
+            const res = await eel.get_inbox()();
+            if (!res.items || res.items.length === 0) {
+                container.innerHTML = '<div class="status-msg">No new notifications.</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            res.items.forEach(item => {
+                const card = document.createElement('div');
+                card.style.cssText = `
+                    padding: 16px;
+                    background: ${item.read ? 'transparent' : 'rgba(74,222,128,0.03)'};
+                    border: 1px solid ${item.read ? 'var(--border-dim)' : 'var(--border-green)'};
+                    border-radius: 6px;
+                    margin-bottom: 8px;
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                `;
+
+                const icon = item.type === 'friend_request' ? '👥' : item.type === 'edit_request' ? '✏️' : item.type === 'achievement' ? '🏆' : '🔔';
+                const time = item.created_at ? new Date(item.created_at).toLocaleDateString() : '';
+
+                let actions = '';
+                if (item.type === 'friend_request' && !item.read) {
+                    let meta = {};
+                    try { meta = typeof item.metadata === 'string' ? JSON.parse(item.metadata) : item.metadata; } catch(e) {}
+                    if (meta.request_id) {
+                        actions = `
+                            <button onclick="acceptFriendFromInbox('${meta.request_id}', this.parentElement.parentElement)" style="background:rgba(74,222,128,0.2); border:1px solid var(--accent-green); color:var(--accent-green); padding:4px 10px; border-radius:4px; cursor:pointer; font-family:var(--font-mono); font-size:10px;">✓ ACCEPT</button>
+                            <button onclick="declineFriendFromInbox('${meta.request_id}', this.parentElement.parentElement)" style="background:rgba(239,68,68,0.1); border:1px solid #ef4444; color:#ef4444; padding:4px 10px; border-radius:4px; cursor:pointer; font-family:var(--font-mono); font-size:10px;">✕ DECLINE</button>
+                        `;
+                    }
+                }
+
+                card.innerHTML = `
+                    <span style="font-size:24px; flex-shrink:0;">${icon}</span>
+                    <div style="flex:1; min-width:0;">
+                        <div style="color:var(--text-white); font-size:13px; line-height:1.4;">${item.message}</div>
+                        <div style="color:var(--text-muted); font-size:10px; margin-top:4px; font-family:var(--font-mono);">${time}</div>
+                    </div>
+                    <div style="display:flex; gap:6px; flex-shrink:0;">
+                        ${actions}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function acceptFriendFromInbox(requestId, cardEl) {
+            const res = await eel.respond_friend_request(requestId, true)();
+            if (res.success) {
+                cardEl.style.borderColor = 'var(--accent-green)';
+                cardEl.innerHTML = '<span style="font-size:24px;">✅</span><div style="flex:1; color:var(--accent-green); font-size:13px;">Friend request accepted!</div>';
+                refreshFriendsList();
+            }
+        }
+
+        async function declineFriendFromInbox(requestId, cardEl) {
+            const res = await eel.respond_friend_request(requestId, false)();
+            if (res.success) {
+                cardEl.style.opacity = '0.4';
+                cardEl.innerHTML = '<span style="font-size:24px;">❌</span><div style="flex:1; color:var(--text-muted); font-size:13px;">Friend request declined.</div>';
+            }
+        }
+        // === PHASE 5: ACTIVITY FEED & DEEP LINKING ===
+        let _currentFeedType = 'global';
+        let isFetchingFeed = false;
+        let _feedOffset = 0;
+        let _hasMoreFeed = true;
+        const _FEED_LIMIT = 20;
+
+        function setFeedType(type) {
+            if (isFetchingFeed) return;
+            _currentFeedType = type;
+            _feedOffset = 0;
+            _hasMoreFeed = true;
+            document.querySelectorAll('.feed-toggle-btn').forEach(b => b.classList.remove('active'));
+            if (type === 'global') document.getElementById('btnFeedGlobal').classList.add('active');
+            else document.getElementById('btnFeedFriends').classList.add('active');
+            
+            document.getElementById('feed-status-label').innerText = `// ${type.toUpperCase()}`;
+            refreshSocialFeed(false);
+        }
+
+        async function refreshSocialFeed(isAppend = false) {
+            if (isFetchingFeed) return; 
+            if (isAppend && !_hasMoreFeed) return;
+
+            isFetchingFeed = true;
+            const container = document.getElementById('socialFeedContent');
+            const filter = document.getElementById('feedTypeFilter').value;
+            const btn = document.getElementById('feedRefreshBtn');
+            const progressBar = document.getElementById('socialFeedProgressBar');
+            
+            if (!isAppend) {
+                _feedOffset = 0;
+                _hasMoreFeed = true;
+            }
+
+            if (btn) btn.classList.add('spinning');
+            if (progressBar) {
+                progressBar.style.opacity = '1';
+                progressBar.style.width = '30%';
+            }
+            
+            if (!isAppend && (container.children.length === 0 || container.querySelector('.status-msg'))) {
+                container.innerHTML = '<div class="status-msg">Accessing the Neural Stream...</div>';
+            }
+
+            try {
+                const res = await eel.get_social_feed(_currentFeedType, _feedOffset, _FEED_LIMIT)();
+                if (progressBar) progressBar.style.width = '70%';
+                
+                if (!res.success) {
+                    let err = res.error;
+                    if (err.includes('DATABASE_MIGRATION_REQUIRED')) {
+                        // Restore migration error UI if needed, but for now just toast
+                        showToast("Neural Link Offset Failure: Migration Required", "error");
+                    } else {
+                        showToast(`Sync Error: ${err}`, "error");
+                    }
+                    isFetchingFeed = false;
+                    if (btn) btn.classList.remove('spinning');
+                    return;
+                }
+
+                if (!res.feed.length && !isAppend) {
+                    container.innerHTML = '<div class="status-msg">Silence in the Neural Web. Check back later or follow more friends.</div>';
+                    isFetchingFeed = false;
+                    if (btn) btn.classList.remove('spinning');
+                    return;
+                }
+
+                if (res.feed.length < _FEED_LIMIT) {
+                    _hasMoreFeed = false;
+                }
+
+                const fragment = document.createDocumentFragment();
+                res.feed.forEach(item => {
+                    // Apply current UI filter
+                    if (filter !== 'all') {
+                        if (filter === 'book_published' && !item.type.includes('book')) return;
+                        if (filter === 'milestone' && !(item.type.includes('milestone') || item.type === 'achievement')) return;
+                        if (filter === 'patch_note' && item.type !== 'patch_note') return;
+                    }
+                    fragment.appendChild(renderFeedCard(item));
+                });
+
+                if (isAppend) {
+                    container.appendChild(fragment);
+                } else {
+                    container.replaceChildren(fragment);
+                    container.scrollTop = 0;
+                }
+
+                _feedOffset += res.feed.length;
+                setupInfiniteScroll();
+
+                if (progressBar) {
+                    progressBar.style.width = '100%';
+                    setTimeout(() => { if (progressBar) progressBar.style.opacity = '0'; }, 300);
+                }
+            } catch (e) {
+                console.error("Neural Sync Error:", e);
+                showToast("Critical Neural Link Failure", "error");
+            } finally {
+                isFetchingFeed = false;
+                if (btn) btn.classList.remove('spinning');
+            }
+        }
+
+        function setupInfiniteScroll() {
+            const container = document.getElementById('socialFeedContent');
+            let sentinel = document.getElementById('feedSentinel');
+            if (sentinel) sentinel.remove();
+            
+            if (!_hasMoreFeed) return;
+            
+            sentinel = document.createElement('div');
+            sentinel.id = 'feedSentinel';
+            sentinel.style.height = '10px';
+            container.appendChild(sentinel);
+            
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && !isFetchingFeed && _hasMoreFeed) {
+                    refreshSocialFeed(true);
+                }
+            }, { root: container, threshold: 0.1 });
+            
+            observer.observe(sentinel);
+        }
+
+        // Real-time Handler: Prepend new items
+        eel.expose(onNewActivity);
+        function onNewActivity(item) {
+            const container = document.getElementById('socialFeedContent');
+            if (!container) return;
+            
+            // 1. Check if it belongs to current view (friends/global)
+            const type = _currentFeedType;
+            if (type === 'global' && !item.is_public) return;
+            
+            // 2. Prepend
+            const card = renderFeedCard(item);
+            card.classList.add('new-post-animation'); 
+            
+            // Remove empty msg if present
+            if (container.querySelector('.status-msg')) container.innerHTML = '';
+            
+            container.insertBefore(card, container.firstChild);
+            showToast(`New Activity: ${item.title}`, "info");
+        }
+
+        let hoverTimeout;
+        let showTimeout;
+        async function showHoverProfile(userId, event) {
+            clearTimeout(hoverTimeout);
+            clearTimeout(showTimeout);
+            
+            const card = document.getElementById('profileHoverCard');
+            const target = event.currentTarget;
+            
+            showTimeout = setTimeout(async () => {
+                // Positioning
+                const rect = target.getBoundingClientRect();
+                card.style.left = `${rect.left}px`;
+                card.style.top = `${rect.bottom + 5 + window.scrollY}px`;
+                
+                // Load skeleton
+                card.innerHTML = '<div class="status-msg">Accessing Profile...</div>';
+                card.classList.add('active');
+
+                try {
+                    const res = await eel.get_user_profile(userId)();
+                    if (res.success) {
+                        const p = res.profile;
+                        const initial = p.username[0].toUpperCase();
+                        const avatarStyle = p.avatar_url ? `background-image: url(${p.avatar_url});` : '';
+                        
+                        card.innerHTML = `
+                            <div class="hover-card-header">
+                                <div class="hover-card-avatar" style="${avatarStyle}">${avatarStyle ? '' : initial}</div>
+                                <div class="hover-card-info">
+                                    <h4>${p.username}</h4>
+                                    <p>Neural Link: Active</p>
+                                </div>
+                            </div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">${p.bio || "No neural bio established."}</div>
+                            <div class="hover-card-stats">
+                                <div class="hover-stat-item">
+                                    <div class="hover-stat-value">${p.stats?.books_translated || 0}</div>
+                                    <div class="hover-stat-label">BOOKS</div>
+                                </div>
+                                <div class="hover-stat-item">
+                                    <div class="hover-stat-value">${p.stats?.total_likes || 0}</div>
+                                    <div class="hover-stat-label">PULSES</div>
+                                </div>
+                            </div>
+                            <button class="feed-teleport-btn" style="width:100%; margin-top:15px;" onclick="viewUserProfile('${userId}')">
+                                VIEW FULL PROFILE
+                            </button>
+                        `;
+                    }
+                } catch(e) {
+                    card.innerHTML = '<div class="status-msg Error">Profile Unreachable</div>';
+                }
+            }, 350); // 350ms delay for smoothness
+        }
+
+        function hideHoverProfile() {
+            clearTimeout(showTimeout);
+            hoverTimeout = setTimeout(() => {
+                document.getElementById('profileHoverCard').classList.remove('active');
+            }, 300);
+        }
+
+        async function viewUserProfile(userId) {
+            // Standardized entry point from generic UI (Feed, etc)
+            // 1. Clear hover card if active
+            const hoverCard = document.getElementById('profileHoverCard');
+            if (hoverCard) {
+                clearTimeout(showTimeout);
+                hoverCard.classList.remove('active');
+            }
+
+            // 2. Open the Dossier modal
+            openNeuralDossier(userId);
+            
+            // NOTE: We NO LONGER switch tabs here because the user wants to stay on the feed.
+            // The modal will appear on top regardless of the active tab.
+        }
+
+        // Keep active if mouse enters the card itself
+        document.addEventListener('DOMContentLoaded', () => {
+             const h = document.getElementById('profileHoverCard');
+             if(h) {
+                 h.onmouseenter = () => clearTimeout(hoverTimeout);
+                 h.onmouseleave = () => hideHoverProfile();
+             }
+        });
+
+        function renderFeedCard(item) {
+            const card = document.createElement('div');
+            card.className = `feed-card ${item.is_pinned ? 'pinned' : ''}`;
+            
+            const username = item.profiles ? item.profiles.username : 'Unknown';
+            const initial = username[0].toUpperCase();
+            const avatarStyle = item.profiles && item.profiles.avatar_url ? `background-image: url(${item.profiles.avatar_url});` : '';
+            
+            // Format time
+            const date = new Date(item.created_at);
+            const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const dateStr = date.toLocaleDateString();
+
+            let icon = '📡';
+            if (item.type === 'book_published' || item.type === 'first_publish') icon = '📕';
+            else if (item.type === 'achievement' || item.type.includes('milestone')) icon = '⚡';
+            else if (item.type === 'long_haul') icon = '📦';
+            else if (item.type === 'curated_repost') icon = '🔄';
+            else if (item.type === 'patch_note') icon = '🛠️';
+
+            card.innerHTML = `
+                ${item.is_pinned ? '<div class="feed-pinned-badge">Pinned</div>' : ''}
+                    <div class="feed-card-avatar" style="${avatarStyle}" 
+                         onclick="openNeuralDossier('${item.user_id}')"
+                         onmouseover="showHoverProfile('${item.user_id}', event)" 
+                         onmouseout="hideHoverProfile()">
+                         ${avatarStyle ? '' : initial}
+                    </div>
+                    <div class="feed-card-body">
+                        <div class="feed-card-title">${item.title}</div>
+                        <div class="feed-card-desc">${item.description}</div>
+                        <div class="feed-card-meta">
+                            ${icon} <span class="feed-username-link" 
+                                          style="cursor:pointer; text-decoration:underline;"
+                                          onclick="openNeuralDossier('${item.user_id}')">${username}</span> • ${timeStr} • ${dateStr}
+                        </div>
+                    </div>
+                ${item.metadata && item.metadata.book_id ? `
+                    <button class="feed-teleport-btn" onclick="teleportToLibraryBook('${item.metadata.book_id}')">
+                        VIEW BOOK IN LIBRARY
+                    </button>
+                ` : ''}
+                <div class="feed-reaction-bar" data-id="${item.id}">
+                    <button class="feed-reaction-btn ${item.user_reacted.includes('clap') ? 'active' : ''}" 
+                            onclick="toggleSocialReaction('${item.id}', 'clap')">
+                        👏 <span>${item.reactions.clap || ''}</span>
+                    </button>
+                    <button class="feed-reaction-btn ${item.user_reacted.includes('heart') ? 'active' : ''}" 
+                            onclick="toggleSocialReaction('${item.id}', 'heart')">
+                        ❤️ <span>${item.reactions.heart || ''}</span>
+                    </button>
+                    <button class="feed-reaction-btn ${item.user_reacted.includes('fire') ? 'active' : ''}" 
+                            onclick="toggleSocialReaction('${item.id}', 'fire')">
+                        🔥 <span>${item.reactions.fire || ''}</span>
+                    </button>
+                </div>
+            `;
+            return card;
+        }
+
+        async function toggleSocialReaction(itemId, type) {
+            const btn = event.currentTarget;
+            const span = btn.querySelector('span');
+            const isActive = btn.classList.contains('active');
+            
+            // Optimistic Update
+            btn.classList.toggle('active');
+            let count = parseInt(span.innerText || 0);
+            span.innerText = isActive ? (count > 0 ? count - 1 : '') : (count + 1);
+
+            try {
+                const res = await eel.toggle_activity_reaction(itemId, type)();
+                if (res.success) {
+                    // Sync exact count from server
+                    span.innerText = res.count > 0 ? res.count : '';
+                } else {
+                    // Rollback on error
+                    btn.classList.toggle('active', isActive);
+                    span.innerText = count > 0 ? count : '';
+                    console.error("Reaction Sync Failed:", res.error);
+                }
+            } catch (e) {
+                console.error("Neural Error in Toggle:", e);
+                // Rollback
+                btn.classList.toggle('active', isActive);
+                span.innerText = count > 0 ? count : '';
+            }
+        }
+
+        async function teleportToLibraryBook(bookId) {
+            // 1. Switch to Library Tab
+            const libBtn = document.querySelector('[data-tab=library]');
+            if (libBtn) switchTab('library', libBtn);
+
+            // 2. Wait for Library to load
+            setTimeout(async () => {
+                // Find card by data-id
+                const targetCard = document.querySelector(`.library-card[data-id="${bookId}"]`);
+
+                if (targetCard) {
+                    const details = targetCard.closest('details');
+                    if (details) details.open = true;
+
+                    targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    targetCard.classList.add('deep-link-highlight');
+                    setTimeout(() => targetCard.classList.remove('deep-link-highlight'), 3000);
+                } else {
+                    console.warn("Book not found in visible library stream. BookID:", bookId);
+                }
+            }, 600);
+        }
+
+        async function repostThisBook(bookId) {
+            try {
+                const res = await eel.repost_book(bookId)();
+                if (res.success) {
+                    showSocialHubToast("Book shared with your connections!");
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        function showSocialHubToast(msg) {
+             const toast = document.createElement('div');
+             toast.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--accent-green); color:#000; padding:10px 20px; border-radius:30px; font-family:var(--font-mono); font-size:12px; font-weight:700; z-index:9999; animation: slideInUp 0.3s;';
+             toast.innerText = "🚀 " + msg;
+             document.body.appendChild(toast);
+             setTimeout(() => {
+                 toast.style.animation = 'fadeOut 0.3s';
+                 setTimeout(() => toast.remove(), 300);
+             }, 3000);
+        }
+
+        // === NOTIFICATION BELL POLLING ===
+        async function pollUnreadCount() {
+            try {
+                const res = await eel.get_unread_count()();
+                updateNotificationBell(res.count || 0);
+            } catch(e) {}
+        }
+
+        // Poll every 15 seconds
+        setInterval(pollUnreadCount, 15000);
+
+        // Refresh Feed every 60 seconds if it is visible
+        setInterval(() => {
+            const feed = document.getElementById('social-feed');
+            if (feed && feed.style.display !== 'none') {
+                refreshSocialFeed();
+            }
+        }, 60000);
+
+        // Refresh friends list when social tab opens
+        const _origSwitchTab = switchTab;
+        switchTab = function(tabId, btn) {
+            const tabEl = document.getElementById('tab-social');
+            const isAlreadyOnSocial = tabEl && tabEl.classList.contains('active');
+            _origSwitchTab(tabId, btn);
+            
+            if (tabId === 'social' && !isAlreadyOnSocial) {
+                // Default to Inbox view ONLY upon fresh entry into Social Hub
+                const inboxBtn = document.querySelector('.social-nav-item');
+                switchSocialView('social-inbox', inboxBtn);
+                
+                refreshFriendsList();
+                pollUnreadCount();
+            }
+        };
+
+
+        // Init poll on page load
+        window.addEventListener('load', () => { setTimeout(pollUnreadCount, 2000); });
+
 
         // === FRIEND CONTEXT MENU ===
         let currentFriendContext = "";
@@ -2266,7 +3766,10 @@
 
         eel.expose(update_translator_page_done);
         function update_translator_page_done(data) {
-            // If we're currently viewing this page, refresh it
+            // 1. Increment global "Knowledge Trace" stat (Live Page Count)
+            try { eel.increment_pages_translated(1); } catch(e) {}
+
+            // 2. If we're currently viewing this page, refresh it
             if (data.page_index === _translatorCurrentPage) {
                 loadTranslatorPage(_translatorCurrentPage);
             }
@@ -2587,7 +4090,7 @@
         }
 
         async function deleteLocalProject(projectId, bookName) {
-            if (confirm(`Are you sure you want to delete local project: ${bookName}?`)) {
+            if (await confirm(`Are you sure you want to delete local project: ${bookName}?`)) {
                 // Not actually implemented in backend yet, but UI stub
                 alert("Backend deletion not wired up yet, but triggered for " + projectId);
             }
@@ -2698,7 +4201,7 @@
 
 
         async function deleteLocalProject(hashId, bookName) {
-            if (!confirm(`Are you sure you want to completely delete "${bookName}" and its cached files? This action cannot be undone.`)) {
+            if (!(await confirm(`Are you sure you want to completely delete "${bookName}" and its cached files? This action cannot be undone.`))) {
                 return;
             }
             
@@ -2891,7 +4394,15 @@
                     const libNum = document.getElementById('dashLibraryNumber');
                     const libStat = document.getElementById('dashLibraryStatus');
                     if (libNum) libNum.textContent = stats.library_count.toLocaleString();
-                    if (libStat) libStat.innerHTML = '<span class="live-dot" style="animation:none;opacity:0.5; background:var(--text-muted);"></span> Indexed';
+                    if (libStat) {
+                        if (stats.library_count > 0) {
+                            libStat.innerHTML = '<span class="live-dot" style="background:var(--accent-green);"></span> Global Sync Active';
+                            libStat.style.color = 'var(--text-green-dim)';
+                        } else {
+                            libStat.innerHTML = '<span class="live-dot" style="animation:none;opacity:0.5; background:#ef4444;"></span> Global Sync Offline';
+                            libStat.style.color = '#ef4444';
+                        }
+                    }
                 }
             } catch (e) {
                 console.error('Dashboard stats error:', e);
@@ -3084,6 +4595,34 @@
             return div.innerHTML;
         }
         
+        async function refreshSysStats() {
+            if (document.querySelector('.dash-page').style.display === 'none' && !document.querySelector('.dash-page').className.includes('active')) {
+                return; // Only poll heavily if dashboard is somewhat active
+            }
+            try {
+                const res = await eel.get_sys_stats()();
+                if (res && res.success) {
+                    const engineEl = document.getElementById('sysEngineState');
+                    const latencyEl = document.getElementById('sysDbLatency');
+                    const hwEl = document.getElementById('sysHardware');
+                    
+                    if (engineEl) {
+                        engineEl.textContent = res.engine;
+                        const engineDot = document.getElementById('sysEngineDot');
+                        if (res.engine.includes('IDLE')) {
+                            engineEl.style.color = 'var(--text-muted)';
+                            if (engineDot) engineDot.style.background = 'var(--text-muted)';
+                        } else {
+                            engineEl.style.color = 'var(--text-green)';
+                            if (engineDot) engineDot.style.background = 'var(--accent-green)';
+                        }
+                    }
+                    if (latencyEl) latencyEl.textContent = res.latency >= 0 ? `PING: ${res.latency}ms` : `DB OFFLINE`;
+                    if (hwEl) hwEl.textContent = `MEM: ${res.mem}MB | CPU: ${res.cpu}%`;
+                }
+            } catch(e) {}
+        }
+        
         // Start dashboard polling + heartbeat on page load
         function startDashboardEngine() {
             if (_dashboardInitialized) return;
@@ -3091,25 +4630,737 @@
             
             // Initial refresh
             refreshDashboard();
+            refreshSysStats();
             
-            // Poll every 30 seconds
+            // Poll every 30 seconds for heavy DB queries
             _dashboardPollingId = setInterval(() => {
                 refreshDashboard();
-                // Heartbeat: update last_seen
                 try { eel.heartbeat_last_seen()(); } catch(e) {}
             }, 30000);
+            
+            // Rapid hardware polling
+            setInterval(refreshSysStats, 2000);
             
             // Immediate heartbeat
             try { eel.heartbeat_last_seen()(); } catch(e) {}
         }
         
+        async function maximizeApp() {
+            try { 
+                const isMax = await eel.maximize_window()(); 
+                const btn = document.getElementById('maxBtn');
+                if(btn) btn.innerHTML = isMax ? '❐' : '□';
+            } catch(e) {}
+        }
+
+        window.addEventListener('resize', () => {
+            const btn = document.getElementById('maxBtn');
+            if (btn) {
+                // If window roughly fills the screen, consider it maximized
+                if (window.outerWidth >= screen.availWidth - 10 && window.outerHeight >= screen.availHeight - 40) {
+                    btn.innerHTML = '❐';
+                } else {
+                    btn.innerHTML = '□';
+                }
+            }
+        });
+
+        // ===========================================================
+        // COMMUNITY FORUMS (REFINED PHASE 7)
+        // ===========================================================
+        let _activeForumCategoryId = null;
+        let _activeForumTopicId = null;
+        let _forumPollingInterval = null;
+
+        async function switchForumContext(context, categoryId = null) {
+            _activeForumCategoryId = categoryId;
+            
+            // Highlight sidebar
+            document.querySelectorAll('.forum-nav-item').forEach(i => i.classList.remove('active'));
+            if (context === 'feed') document.getElementById('forumNavFeed').classList.add('active');
+            if (context === 'news') document.getElementById('forumNavNews').classList.add('active');
+            if (context === 'categories') document.getElementById('forumNavCategories').classList.add('active');
+            if (context === 'my-forums') document.getElementById('forumNavMyForums').classList.add('active');
+            
+            // Toggle visibility
+            document.getElementById('forumTopicListView').style.display = (context !== 'categories') ? 'flex' : 'none';
+            document.getElementById('forumCategoryBrowser').style.display = (context === 'categories') ? 'flex' : 'none';
+            document.getElementById('forumTopicMessagesView').style.display = 'none';
+
+            if (context === 'feed') {
+                refreshForumTopics(null); // Global Feed
+            } else if (context === 'news') {
+                // Find system category ID
+                const res = await eel.get_forum_categories()();
+                const newsCat = res.categories.find(c => c.is_system);
+                if (newsCat) refreshForumTopics(newsCat.id);
+            } else if (context === 'categories') {
+                refreshForumCategories();
+            } else if (context === 'my-forums') {
+                refreshForumTopics('my-forums');
+            }
+            
+            // Start/Reset polling only for feed/news
+            startForumPolling(context);
+        }
+
+        function startForumPolling(context) {
+            clearInterval(_forumPollingInterval);
+            if (context === 'categories') return;
+            
+            _forumPollingInterval = setInterval(() => {
+                const topicView = document.getElementById('forumTopicListView');
+                if (_currentSocialView === 'social-forums' && topicView.style.display !== 'none') {
+                    // Silently refresh topics
+                    refreshForumTopics(_activeForumCategoryId, document.getElementById('forumSearchInput').value, true);
+                }
+            }, 30000); // 30s
+        }
+
+        async function refreshForumCategories() {
+            const grid = document.getElementById('forumCategoriesGrid');
+            if (!grid) return;
+            grid.innerHTML = '<div class="status-msg">Accessing archives...</div>';
+
+            try {
+                const res = await eel.get_forum_categories()();
+                if (res.success) {
+                    grid.innerHTML = '';
+                    res.categories.forEach(cat => {
+                        // Debug Log
+                        console.log(`Cat Check: ${cat.name} | Owner: ${cat.author_id} | Me: ${_currentUserId} | SysAdmin: ${_isSystemAdmin}`);
+
+                        const isOwner = cat.author_id === _currentUserId || _isSystemAdmin;
+                        const deleteBtn = (isOwner && !cat.is_system) 
+                            ? `<button class="pin-toggle-btn" onclick="event.stopPropagation(); event.preventDefault(); deleteForumCategory('${cat.id}')" title="Delete Category">🗑️</button>` 
+                            : '';
+
+                        const details = document.createElement('details');
+                        details.className = 'forum-category-accordion';
+                        
+                        // summary is the card
+                        const summary = document.createElement('summary');
+                        summary.className = 'forum-topic-card category-header';
+                        summary.style.borderLeft = cat.is_system ? '3px solid var(--accent-green)' : 'none';
+                        
+                        summary.innerHTML = `
+                            <div class="forum-topic-info">
+                                <div class="forum-topic-title">${cat.is_system ? '📜' : '📁'} ${escapeHtml(cat.name)}</div>
+                                <div class="forum-topic-meta" style="font-size:10px; color:var(--text-muted);">${escapeHtml(cat.description || 'Community category.')}</div>
+                            </div>
+                            <div class="forum-topic-stats">
+                                ${deleteBtn}
+                                <span class="accordion-arrow">▼</span>
+                            </div>
+                        `;
+                        
+                        const topicList = document.createElement('div');
+                        topicList.id = `cat-topics-${cat.id}`;
+                        topicList.className = 'forum-category-topics';
+                        topicList.innerHTML = '<div class="status-msg">Opening category...</div>';
+                        
+                        details.appendChild(summary);
+                        details.appendChild(topicList);
+                        
+                        // Load topics on toggle
+                        details.ontoggle = () => {
+                            if (details.open) {
+                                renderCategoryTopics(cat.id, topicList);
+                            }
+                        };
+                        
+                        grid.appendChild(details);
+                    });
+                }
+            } catch(e) { 
+                console.error("Forum Category Sync Error:", e);
+                grid.innerHTML = '<div class="status-msg">Failed to load categories.</div>'; 
+            }
+        }
+
+        async function deleteForumCategory(catId) {
+            if (await confirm("Permanently delete this category? This will also remove all forums inside.")) {
+                try {
+                    const res = await eel.delete_forum_category(catId)();
+                    if (res.success) {
+                        showSocialHubToast("CATEGORY DELETED");
+                        refreshForumCategories();
+                    } else {
+                        alert(res.error || "Failed to delete category");
+                    }
+                } catch(e) { alert("Error: " + e); }
+            }
+        }
+
+        async function renderCategoryTopics(catId, container) {
+            container.innerHTML = '<div class="status-msg">Reading topics...</div>';
+            try {
+                const res = await eel.get_forum_topics(catId)();
+                if (res.success) {
+                    container.innerHTML = '';
+                    if (res.topics.length === 0) {
+                        container.innerHTML = '<div class="status-msg">No topics in this category yet.</div>';
+                        return;
+                    }
+                    res.topics.forEach(t => {
+                        const timeStr = getTimeAgo(new Date(t.created_at).getTime());
+                        const card = document.createElement('div');
+                        card.className = 'forum-topic-card' + (t.is_pinned ? ' pinned' : '');
+                        card.style.marginLeft = '20px'; // Indent topics
+                        card.style.background = 'rgba(255,255,255,0.02)';
+                        card.onclick = () => openForumTopic(t);
+                        
+                        const badges = t.is_pinned ? '<span class="forum-topic-badge badge-pinned">📌 PINNED</span>' : '';
+                        const pinAction = (t.author_id === _currentUserId || _isSystemAdmin) 
+                            ? `<button class="pin-toggle-btn" onclick="event.stopPropagation(); toggleForumPin('${t.id}')">${t.is_pinned ? '📍' : '📌'}</button>` 
+                            : '';
+
+                        card.innerHTML = `
+                            <div class="forum-topic-info">
+                                <div class="forum-topic-title">${badges} ${escapeHtml(t.title)}</div>
+                                <div class="forum-topic-meta" style="font-size:10px; color:var(--text-muted);">@${t.author_username} • ${timeStr}</div>
+                            </div>
+                            <div class="forum-topic-stats">
+                                ${pinAction}
+                                <span>💬 ${t.post_count}</span>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = `<div class="status-msg">Failed: ${res.error || 'Unknown Error'}</div>`;
+                }
+            } catch(e) { 
+                console.error("Render Category Topics Error:", e);
+                container.innerHTML = '<div class="status-msg">Sync error.</div>'; 
+            }
+        }
+
+        async function refreshForumTopics(catId = null, query = '', isSilent = false, authorId = null) {
+            const list = document.getElementById('forumTopicList');
+            if (!list) return;
+            if (!isSilent) list.innerHTML = '<div class="status-msg">Accessing topic stream...</div>';
+            
+            try {
+                // Determine if we should only fetch "My Forums"
+                const activeAuthorId = (catId === 'my-forums') ? _currentUserId : authorId;
+                const activeCatId = (catId === 'my-forums' || catId === 'news') ? null : catId;
+                const activeQuery = (catId === 'news') ? 'patch note' : query;
+
+                const res = await eel.get_forum_topics(activeCatId, activeQuery, null, activeAuthorId)();
+                if (res.success) {
+                    list.innerHTML = '';
+                    if (res.topics.length === 0) {
+                        list.innerHTML = '<div class="status-msg">No topics found. Be the first to start a conversation!</div>';
+                        return;
+                    }
+                    
+                    res.topics.forEach(t => {
+                        const timeStr = getTimeAgo(new Date(t.created_at).getTime());
+                        const card = document.createElement('div');
+                        card.className = 'forum-topic-card' + (t.is_pinned ? ' pinned' : '');
+                        card.onclick = () => openForumTopic(t);
+                        
+                        const badges = [];
+                        if (t.is_pinned) badges.push('<span class="forum-topic-badge badge-pinned">📌 PINNED</span>');
+                        
+                        // Admin Pin Toggle (Stop Propagation)
+                        const pinAction = (t.author_id === _currentUserId || _isSystemAdmin) 
+                            ? `<button class="pin-toggle-btn" onclick="event.stopPropagation(); toggleForumPin('${t.id}')" title="Toggle Pin">${t.is_pinned ? '📍' : '📌'}</button>` 
+                            : '';
+
+                        const deleteAction = (t.author_id === _currentUserId || _isSystemAdmin)
+                            ? `<button class="pin-toggle-btn" style="color:var(--accent-red);" onclick="event.stopPropagation(); deleteForumTopic('${t.id}', '${escapeHtml(t.title)}')">🗑️</button>`
+                            : '';
+
+                        card.innerHTML = `
+                            <div class="forum-topic-info">
+                                <div class="forum-topic-title">${badges.join('')} ${escapeHtml(t.title)}</div>
+                                <div class="forum-topic-meta" style="font-size:10px; color:var(--text-muted);">
+                                    by @${t.author_username} • ${timeStr} 
+                                    ${t.tags ? '• ' + t.tags.split(',').map(tag => `<span style="color:var(--accent-green);">#${tag.trim()}</span>`).join(' ') : ''}
+                                </div>
+                            </div>
+                            <div class="forum-topic-stats">
+                                ${pinAction}
+                                ${deleteAction}
+                                <span>💬 ${t.post_count}</span>
+                            </div>
+                        `;
+                        list.appendChild(card);
+                    });
+                }
+            } catch(e) { if(!isSilent) list.innerHTML = '<div class="status-msg">Error loading topics.</div>'; }
+        }
+
+        async function toggleForumPin(topicId) {
+            try {
+                const res = await eel.toggle_forum_pin(topicId)();
+                if (res.success) {
+                    refreshForumTopics(_activeForumCategoryId, document.getElementById('forumSearchInput').value, true);
+                    showSocialHubToast(res.is_pinned ? "TOPIC PINNED" : "TOPIC UNPINNED");
+                }
+            } catch(e) {}
+        }
+
+        async function deleteForumTopic(id, title) {
+            const confirmed = await confirm(`Are you sure you want to delete the forum "${title}"? This will remove all posts and records across all feeds.`);
+            if (!confirmed) return;
+            
+            try {
+                const res = await eel.delete_forum_topic(id)();
+                if (res.success) {
+                    showSocialHubToast("FORUM DELETED");
+                    // Force refresh all potential views after a tiny delay for DB propagation
+                    setTimeout(() => {
+                        refreshForumTopics(null, '', true);
+                        refreshForumCategories();
+                        if (typeof refreshSocialFeed === 'function') refreshSocialFeed();
+                        
+                        // Handle context-specific refresh for My Forums
+                        const nav = document.querySelector('.forum-nav-item.active');
+                        if (nav && nav.id === 'forumNavMyForums') refreshForumTopics('my-forums', '', true);
+                    }, 100);
+
+                    // If we are currently viewing this topic, back out
+                    if (_activeForumTopicId === id) showForumTopicList();
+                } else {
+                    alert(res.error || "Failed to delete topic.");
+                }
+            } catch(e) { alert("Error: " + e); }
+        }
+
+        function showForumTopicList() {
+            document.getElementById('forumTopicMessagesView').style.display = 'none';
+            // If we have an active category but were in the browser, stay in the list
+            document.getElementById('forumTopicListView').style.display = 'block';
+            document.getElementById('forumCategoryBrowser').style.display = 'none';
+        }
+
+        let _activeForumTopicAuthorId = null;
+        async function openForumTopic(topic) {
+            _activeForumTopicId = topic.id;
+            _activeForumTopicAuthorId = topic.author_id;
+            document.getElementById('forumTopicListView').style.display = 'none';
+            document.getElementById('forumTopicMessagesView').style.display = 'flex';
+            document.getElementById('activeTopicTitle').textContent = topic.title;
+            document.getElementById('activeTopicMeta').innerHTML = `by @${topic.author_username} • ${new Date(topic.created_at).toLocaleString()}`;
+            refreshForumMessages();
+        }
+
+        async function refreshForumMessages() {
+            const list = document.getElementById('forumMessagesList');
+            if (!list) return;
+            const currentUserId = window._cachedUserId;
+            const isAdmin = window._cachedProfile ? window._cachedProfile.is_admin : false;
+            
+            list.innerHTML = '<div class="status-msg">Loading transmission...</div>';
+            try {
+                const res = await eel.get_forum_posts(_activeForumTopicId)();
+                if (res.success) {
+                    list.innerHTML = '';
+                    if (!res.posts || res.posts.length === 0) {
+                        list.innerHTML = '<div class="status-msg">No messages in this topic.</div>';
+                        return;
+                    }
+                    res.posts.forEach((p, idx) => {
+                        try {
+                            const isMine = p.author_id === currentUserId;
+                            const isTopicOwner = currentUserId === _activeForumTopicAuthorId;
+                            
+                            const msgItem = document.createElement('div');
+                            msgItem.className = 'dm-message-item forum-post-item';
+                            if (idx === 0) {
+                                msgItem.classList.add('forum-op-message');
+                            }
+                            
+                            const username = isMine ? "You" : (p.username || "Deleted User");
+                            const initial = (p.username || "U")[0].toUpperCase();
+                            const avatar = p.avatar_url;
+                            const timeStr = getTimeAgo(new Date(p.created_at).getTime());
+
+                            let avatarHtml = `<div class="dm-avatar">${initial}</div>`;
+                            if (avatar) {
+                                avatarHtml = `<div class="dm-avatar" style="background-image: url('${avatar}')"></div>`;
+                            }
+
+                            if (idx === 0) {
+                                msgItem.classList.add('forum-op-message');
+                                msgItem.style.position = 'sticky';
+                                msgItem.style.top = '0';
+                                msgItem.style.zIndex = '10';
+                                msgItem.style.background = 'var(--bg-pane)';
+                                msgItem.style.borderBottom = '2px solid var(--border-dim)';
+                                msgItem.style.paddingBottom = '20px';
+                                msgItem.style.marginBottom = '20px';
+                            }
+
+                            let actionsHtml = '';
+                            if (isMine) {
+                                actionsHtml = `
+                                    <div class="dm-actions" style="opacity:0.3;">
+                                        <div class="dm-action-btn" title="Edit" onclick="startEditForumPost('${p.id}')">✎</div>
+                                        <div class="dm-action-btn delete" title="Delete" onclick="deleteForumPost('${p.id}')">✕</div>
+                                    </div>
+                                `;
+                            } else if (isTopicOwner || isAdmin) {
+                                actionsHtml = `
+                                    <div class="dm-actions" style="opacity:0.3;">
+                                        <div class="dm-action-btn delete" title="Delete" onclick="deleteForumPost('${p.id}')">✕</div>
+                                    </div>
+                                `;
+                            }
+
+                            const isEdited = p.updated_at && p.updated_at !== p.created_at;
+
+                            msgItem.innerHTML = `
+                                ${avatarHtml}
+                                <div class="dm-content-wrapper">
+                                    <div class="dm-header">
+                                        <span class="dm-user" onclick="openNeuralDossier('${p.author_id}', '${p.username}')" style="cursor:pointer; ${isMine?'color:var(--accent-green);':''}">${username}</span>
+                                        <span class="dm-time">${timeStr}</span>
+                                        ${isEdited ? '<span class="dm-edited">(edited)</span>' : ''}
+                                        ${actionsHtml}
+                                    </div>
+                                    <div class="dm-text" id="forum-text-${p.id}">${escapeHtml(p.content || '')}</div>
+                                    ${idx === 0 ? '<div class="forum-op-badge" style="font-size:9px; color:var(--accent-green); margin-top:8px; opacity:0.6; font-family:var(--font-mono); font-weight:700;">📍 ORIGINAL POST // REASON FOR TOPIC</div>' : ''}
+                                </div>
+                            `;
+                            list.appendChild(msgItem);
+                        } catch(innerE) { console.error("Post Render Item Error:", innerE); }
+                    });
+                    list.scrollTop = list.scrollHeight;
+                } else {
+                    list.innerHTML = `<div class="status-msg">Failed: ${res.error || 'Server rejected request'}</div>`;
+                }
+            } catch(e) { 
+                console.error("Refresh Forum Messages Error:", e);
+                list.innerHTML = `<div class="status-msg">Sync Error: ${e.message || e}</div>`; 
+            }
+        }
+
+        async function startEditForumPost(postId) {
+            const textEl = document.getElementById(`forum-text-${postId}`);
+            if (!textEl) return;
+            const originalContent = textEl.innerText;
+            if (textEl.querySelector('input')) return;
+
+            textEl.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:2px; padding:0;">
+                    <input type="text" class="dm-ghost-input" id="forum-edit-input-${postId}" value="${originalContent}">
+                    <div class="dm-edit-hint">
+                        escape to <b class="cancel" onclick="cancelEditForumPost('${postId}', '${originalContent.replace(/'/g, "\\'")}')">cancel</b> • 
+                        enter to <b onclick="saveEditForumPost('${postId}')">save</b>
+                    </div>
+                </div>
+            `;
+            
+            const input = document.getElementById(`forum-edit-input-${postId}`);
+            input.focus();
+            input.select();
+            
+            input.onkeydown = async (e) => {
+                if (e.key === 'Escape') cancelEditForumPost(postId, originalContent);
+                else if (e.key === 'Enter') saveEditForumPost(postId);
+            };
+        }
+
+        function cancelEditForumPost(postId, originalContent) {
+            const textEl = document.getElementById(`forum-text-${postId}`);
+            if (textEl) textEl.innerText = originalContent;
+        }
+
+        async function saveEditForumPost(postId) {
+            const input = document.getElementById(`forum-edit-input-${postId}`);
+            const textEl = document.getElementById(`forum-text-${postId}`);
+            if (!input || !textEl) return;
+            
+            const newContent = input.value.trim();
+            if (!newContent) return;
+            
+            try {
+                const res = await eel.edit_forum_post(postId, newContent)();
+                if (res.success) {
+                    textEl.innerText = newContent;
+                    const header = textEl.parentElement.querySelector('.dm-header');
+                    if (header && !header.querySelector('.dm-edited')) {
+                        const badge = document.createElement('span');
+                        badge.className = 'dm-edited';
+                        badge.textContent = '(edited)';
+                        header.insertBefore(badge, header.querySelector('.dm-actions'));
+                    }
+                } else {
+                    alert("Edit failed: " + res.error);
+                }
+            } catch(e) { alert("Error: " + e); }
+        }
+
+        async function deleteForumPost(postId) {
+            const confirmed = await confirm("Delete this message?");
+            if (!confirmed) return;
+            try {
+                const res = await eel.delete_forum_post(postId)();
+                if (res.success) {
+                    showSocialHubToast("MESSAGE DELETED");
+                    refreshForumMessages();
+                } else {
+                    alert(res.error || "Failed to delete message");
+                }
+            } catch(e) { alert("Error: " + e); }
+        }
+
+        async function submitForumReply() {
+            const input = document.getElementById('forumReplyInput');
+            const content = input.value.trim();
+            if (!content) return;
+            
+            const btn = event.currentTarget;
+            btn.disabled = true;
+            btn.textContent = 'SENDING...';
+            
+            try {
+                const res = await eel.create_forum_post(_activeForumTopicId, content)();
+                if (res.success) {
+                    input.value = '';
+                    refreshForumMessages();
+                    showSocialHubToast(`REPLY POSTED!`);
+                } else {
+                    alert(res.error || "Failed to post reply");
+                }
+            } catch(e) { alert("Error: " + e); }
+            finally {
+                btn.disabled = false;
+                btn.textContent = 'REPLY';
+            }
+        }
+
+        async function openNewForumModal() {
+            const modal = document.createElement('div');
+            modal.id = 'newForumModal';
+            modal.className = 'login-overlay active';
+            
+            // Fetch categories for the dropdown
+            try {
+                const res = await eel.get_forum_categories()();
+                let options = res.categories ? res.categories.filter(c => !c.is_system).map(c => `<option value="${c.id}">${c.name}</option>`).join('') : '';
+                
+                modal.innerHTML = `
+                    <div class="login-modal" style="width:500px;">
+                        <div class="login-header">
+                            <div class="login-title">💬 CREATE NEW FORUM</div>
+                            <div class="login-close" onclick="document.getElementById('newForumModal').remove()">×</div>
+                        </div>
+                        <div class="login-body">
+                            <div class="login-field">
+                                <label>TITLE</label>
+                                <input type="text" id="forumTitleInput" class="login-input" placeholder="Give your forum a clear name...">
+                            </div>
+                            
+                            <div class="login-field">
+                                <label>CATEGORY</label>
+                                <select id="forumCategorySelect" class="login-input">
+                                    ${options}
+                                    <option value="NEW">+ Create New Category...</option>
+                                </select>
+                            </div>
+
+                            <div id="newCategoryFields" style="display:none; padding:15px; background:rgba(255,255,255,0.03); border:1px dashed var(--border-dim); border-radius:6px; margin-bottom:15px;">
+                                <div class="login-field" style="margin-bottom:0;">
+                                    <label>NEW CATEGORY NAME</label>
+                                    <input type="text" id="newCategoryNameInput" class="login-input" placeholder="e.g. Creative Arts">
+                                </div>
+                            </div>
+
+                            <div class="login-field">
+                                <label>INITIAL MESSAGE (Pinned Header)</label>
+                                <textarea id="forumContentInput" class="login-input" style="height:100px; resize:none;" placeholder="Explain what this forum is for..."></textarea>
+                            </div>
+                            <div class="login-field">
+                                <label>TAGS (Comma separated)</label>
+                                <input type="text" id="forumTagsInput" class="login-input" placeholder="e.g. guide, help, rust">
+                            </div>
+                            <div class="login-field">
+                                <label>BROADCAST TO FEED</label>
+                                <div class="visibility-selector">
+                                    <div class="visibility-option active" onclick="setForumVisibility('none', this)">NONE</div>
+                                    <div class="visibility-option" onclick="setForumVisibility('friends', this)">FRIENDS</div>
+                                    <div class="visibility-option" onclick="setForumVisibility('global', this)">GLOBAL</div>
+                                </div>
+                            </div>
+                            <button class="social-action-btn" style="margin-top:10px;" onclick="submitNewForum()">PUBLISH FORUM</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                const select = document.getElementById('forumCategorySelect');
+                const newFields = document.getElementById('newCategoryFields');
+                select.onchange = () => {
+                    newFields.style.display = select.value === 'NEW' ? 'block' : 'none';
+                };
+                
+                window._newForumVisibility = 'none';
+            } catch(e) { alert("Error loading categories: " + e); }
+        }
+
+        function setForumVisibility(mode, btn) {
+            window._newForumVisibility = mode;
+            document.querySelectorAll('.visibility-option').forEach(o => o.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        async function submitNewForum() {
+            const title = document.getElementById('forumTitleInput').value.trim();
+            const content = document.getElementById('forumContentInput').value.trim();
+            const tags = document.getElementById('forumTagsInput').value.split(',').map(t => t.trim()).filter(t => t);
+            const categoryId = document.getElementById('forumCategorySelect').value;
+            const newCatName = document.getElementById('newCategoryNameInput').value.trim();
+            const visibility = window._newForumVisibility || 'none';
+
+            if (!title || !content) {
+                alert("Title and content are required.");
+                return;
+            }
+            if (categoryId === 'NEW' && !newCatName) {
+                alert("Please provide a name for the new category.");
+                return;
+            }
+
+            const btn = document.querySelector('#newForumModal .social-action-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'PUBLISHING...';
+            }
+
+            try {
+                const res = await eel.create_forum_topic(
+                    categoryId === 'NEW' ? null : categoryId,
+                    title,
+                    content,
+                    tags,
+                    visibility,
+                    categoryId === 'NEW' ? newCatName : null
+                )();
+
+                if (res.success) {
+                    const modal = document.getElementById('newForumModal');
+                    if (modal) modal.remove();
+                    showSocialHubToast(`FORUM CREATED!`);
+                    
+                    // Refresh views
+                    if (_activeForumCategoryId === null || _activeForumCategoryId === categoryId) {
+                        refreshForumTopics(_activeForumCategoryId);
+                    }
+                    if (typeof refreshForumCategories === 'function') refreshForumCategories();
+
+                    const targetTopicList = document.getElementById(`cat-topics-${categoryId}`);
+                    if (targetTopicList) {
+                        renderCategoryTopics(categoryId, targetTopicList);
+                    }
+
+                    // 3. If it's a NEW category, we must refresh the category grid
+                    if (categoryId === 'NEW' || !categoryId) {
+                        refreshForumCategories();
+                    }
+                } else {
+                    alert("Failed: " + res.error);
+                }
+            } catch(e) { 
+                alert("Error: " + e); 
+            } finally {
+                const modal = document.getElementById('newForumModal');
+                if (modal && btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'PUBLISH FORUM';
+                }
+            }
+        }
+
+        function searchForums(tag) {
+            const input = document.getElementById('forumSearchInput');
+            if (tag) input.value = tag;
+            refreshForumTopics(input.value);
+        }
+
         // Auto-start when page loads
         window.addEventListener('DOMContentLoaded', () => {
+            // Disable default browser context menu
+            window.addEventListener('contextmenu', e => e.preventDefault());
+
             setTimeout(startDashboardEngine, 1000); // Small delay to let Eel connect
+            
+            // Initial maximize check
+            window.dispatchEvent(new Event('resize'));
         });
 
     </script>
 
+    <!-- TOAST NOTIFICATIONS HUB -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- DELETE ACCOUNT MODAL -->
+    <div class="login-overlay" id="deleteAccountModal">
+        <div class="login-modal" style="width:400px; border-color:#ef4444;">
+            <div class="login-header" style="background:rgba(239, 68, 68, 0.1);">
+                <div class="login-title" style="color:#ef4444;">⚠️ PERMANENT DELETION</div>
+                <div class="login-close" onclick="closeDeleteAccountModal()">×</div>
+            </div>
+            <div class="login-body" style="gap:15px;">
+                <p style="font-size:12px; line-height:1.5; color:var(--text-white);">
+                    This will permanently delete your account, your published books, and wipe your <b>local project cache</b>. 
+                    Your messages and forum posts will remain but will be anonymized as <b>'Deleted User'</b>.
+                </p>
+                <div style="background:rgba(239, 68, 68, 0.05); padding:10px; border-radius:4px; border:1px solid rgba(239, 68, 68, 0.2); font-size:11px; color:#ef4444; font-family:var(--font-mono);">
+                    This action is IRREVERSIBLE. All local translation progress will be lost.
+                </div>
+                <div class="login-field">
+                    <label style="color:#ef4444;">TYPE "DELETE" TO CONFIRM</label>
+                    <input type="text" id="confirmDeleteInput" class="login-input delete-confirm-input" placeholder="DELETE" oninput="checkDeletePhrase(this.value)">
+                </div>
+                <button class="login-action-btn btn-danger-final" id="finalDeleteBtn" onclick="confirmDeleteAccount()" disabled>CONFIRM PERMANENT DELETION</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ACCOUNT DELETION LOGIC
+        function openDeleteAccountModal() {
+            document.getElementById('confirmDeleteInput').value = '';
+            document.getElementById('finalDeleteBtn').disabled = true;
+            document.getElementById('deleteAccountModal').classList.add('active');
+        }
+        function closeDeleteAccountModal() {
+            document.getElementById('deleteAccountModal').classList.remove('active');
+        }
+        function checkDeletePhrase(val) {
+            document.getElementById('finalDeleteBtn').disabled = (val !== 'DELETE');
+        }
+        async function confirmDeleteAccount() {
+            const btn = document.getElementById('finalDeleteBtn');
+            const originalText = btn.textContent;
+            btn.textContent = "WIPING SYSTEMS...";
+            btn.disabled = true;
+
+            try {
+                const res = await eel.delete_user_account()();
+                if (res.success) {
+                    alert("Account and local cache have been permanently deleted.");
+                    location.reload(); // Refresh to clear state
+                } else {
+                    alert("Deletion failed: " + res.error);
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                alert("Connection error during deletion: " + err);
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+    <!-- Floating UI elements -->
+    <div id="profileHoverCard" class="profile-hover-card"></div>
 </body>
 </html>
 

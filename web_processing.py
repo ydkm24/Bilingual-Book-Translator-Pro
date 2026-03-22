@@ -51,6 +51,7 @@ class WebTranslatorManager:
         self.target_lang = "English"
         self.engine = "Google"
         self.is_running = False
+        self.status = "ENGINE IDLE"
         self.stop_requested = False
         self._worker_thread = None
         self.tesseract_path = resource_path(os.path.join("bin", "tesseract", "tesseract.exe"))
@@ -76,7 +77,7 @@ class WebTranslatorManager:
     # PDF LOADING
     # ------------------------------------------------------------------
 
-    def load_pdf(self, file_path, folder_name=None):
+    def load_pdf(self, file_path, folder_name=None, cache_base=None):
         """Opens a PDF, extracts page count, renders first page image, returns metadata."""
         if not file_path or not os.path.exists(file_path):
             return {"success": False, "error": "File not found."}
@@ -101,8 +102,13 @@ class WebTranslatorManager:
                 folder_name = f"{book_name}_{hasher.hexdigest()[:8]}"
             
             from utils import get_app_path
-            self.cache_dir = get_app_path(os.path.join(".translator_cache", folder_name))
+            # Use user-specific cache_base if provided, otherwise fall back to shared
+            if cache_base:
+                self.cache_dir = os.path.join(cache_base, folder_name)
+            else:
+                self.cache_dir = get_app_path(os.path.join(".translator_cache", folder_name))
             os.makedirs(self.cache_dir, exist_ok=True)
+
 
             # Copy PDF into cache so we never lose it
             cached_pdf_path = os.path.join(self.cache_dir, "source.pdf")
@@ -293,6 +299,7 @@ class WebTranslatorManager:
 
                 # Send progress update to frontend (AFTER SKIP CHECK to prevent page 1 reset)
                 progress_pct = int(((page_num) / self.total_pages) * 100)
+                self.status = f"OCR: PAGE {page_num + 1}/{self.total_pages}"
                 try:
                     eel.update_translator_progress({
                         "page": page_num + 1,
@@ -314,7 +321,7 @@ class WebTranslatorManager:
                     res = ocr_worker(
                         page_num, self.pdf_path, ocr_lang_code, is_auto,
                         LANGUAGES, translator_src, page_width, is_rtl, self.tesseract_path,
-                        fallback_mode=is_fallback, ocr_tier=self.ocr_tier
+                        fallback_mode=is_fallback, ocr_tier=self.ocr_tier, cache_dir=self.cache_dir
                     )
                 except Exception as e:
                     res = {"page": page_num, "error": str(e)}
@@ -331,6 +338,7 @@ class WebTranslatorManager:
                     src = res.get("translator_src", translator_src)
 
                     if len(source_text) > 5 and "[No Text" not in source_text:
+                        self.status = f"TRANS: PAGE {page_num + 1}"
                         try:
                             eel.update_translator_progress({
                                 "page": page_num + 1,
@@ -402,6 +410,7 @@ class WebTranslatorManager:
                     })()
                 else:
                     # Completed successfully
+                    self.status = "ENGINE IDLE"
                     eel.update_translator_progress({
                         "page": self.total_pages,
                         "total": self.total_pages,
@@ -539,7 +548,7 @@ class WebTranslatorManager:
             ocr_res = ocr_worker(
                 0, temp_path, ocr_code, is_auto, LANGUAGES, 
                 translator_src, 1000, False, self.tesseract_path,
-                False, "Best", True
+                False, "Best", True, None # None for cache_dir in quick translate
             )
             
             # Clean up
