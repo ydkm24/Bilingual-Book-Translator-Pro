@@ -12,9 +12,12 @@ import re
 from utils import humanize_error, get_app_path
 
 
-def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translator_src, page_width, current_rtl, tesseract_path, fallback_mode=False, ocr_tier="Standard", is_quick_mode=False, cache_dir=None):
+def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translator_src, page_width, current_rtl, tesseract_path, fallback_mode=False, ocr_tier="Standard", is_quick_mode=False, cache_dir=None, cancel_check=None):
     """Standalone worker for processing a single page in a separate process.
     Reads image directly from file and extracts layout blocks independently."""
+    if cancel_check and cancel_check():
+        return {"page": page_num, "status": "cancelled"}
+
     # We re-import inside the worker to ensure process-isolation safety
     import pytesseract
     from PIL import Image
@@ -27,6 +30,15 @@ def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translato
     import fitz
     
     # CRITICAL: Path must be set PER PROCESS on Windows. Resolved via Phase A abstraction.
+    # Simple log inside worker
+    def worker_log(msg):
+        try:
+            log_path = os.path.join(os.environ.get('LOCALAPPDATA', os.path.expanduser('~')), "PDF_Translator", "debug.log")
+            if not os.path.exists(os.path.dirname(log_path)): os.makedirs(os.path.dirname(log_path), exist_ok=True)
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(f"[{time.strftime('%H:%M:%S')}] [Worker {os.getpid()}] Page {page_num}: {msg}\n")
+        except: pass
+
     # SPRINT 55: Native Path handling — TESSDATA_PREFIX must point TO the tessdata folder
     pytesseract.pytesseract.tesseract_cmd = tesseract_path
     
@@ -42,15 +54,23 @@ def ocr_worker(page_num, file_path, ocr_lang_code, is_auto, languages, translato
     tessdata_subdir = tessdata_dir_map.get(ocr_tier, "tessdata")
     tess_data_dir = os.path.join(tess_dir, tessdata_subdir)
     
+    # SPRINT 105: Dynamic Tier Recovery (Prevents crash if 'Best' model is missing for a language)
+    # We check if ALL requested languages exist in the target tier. If not, fallback to Standard "tessdata"
+    langs_to_check = ocr_lang_code.split('+')
+    all_available = True
+    for lang in langs_to_check:
+        model_name = f"{lang}.traineddata"
+        if not os.path.exists(os.path.join(tess_data_dir, model_name)):
+            all_available = False
+            break
+            
+    if not all_available and ocr_tier != "Standard":
+        worker_log(f"Model(s) missing in {ocr_tier} tier. Falling back to Standard Model for stability.")
+        tessdata_subdir = "tessdata"
+        tess_data_dir = os.path.join(tess_dir, tessdata_subdir)
+
     os.environ["TESSDATA_PREFIX"] = tess_data_dir
     
-    # Simple log inside worker
-    def worker_log(msg):
-        try:
-            log_path = os.path.join(os.environ.get('LOCALAPPDATA', os.path.expanduser('~')), "PDF_Translator", "debug.log")
-            with open(log_path, "a", encoding="utf-8") as f:
-                f.write(f"[{time.strftime('%H:%M:%S')}] [Worker {os.getpid()}] Page {page_num}: {msg}\n")
-        except: pass
     
     worker_log("Started processing.")
     
@@ -287,13 +307,23 @@ def translate_worker(text, translator_src, target_lang="en", engine="Google", de
     'context' can be a dict with 'prev_page' and 'next_page' strings for GPT-4o refinement.
     'cancel_check' is an optional callable returning True if we should abort immediately.
     """
+    import os
+    import time
+    import random
+    import re
+    
+    def worker_log(msg):
+        try:
+            log_path = os.path.join(os.environ.get('LOCALAPPDATA', os.path.expanduser('~')), "PDF_Translator", "debug.log")
+            if not os.path.exists(os.path.dirname(log_path)): os.makedirs(os.path.dirname(log_path), exist_ok=True)
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(f"[{time.strftime('%H:%M:%S')}] [TransWorker] {msg}\n")
+        except: pass
+
     # SPRINT 65: Null safety for source language
     if not translator_src:
         translator_src = "auto"
     from deep_translator import GoogleTranslator
-    import time
-    import random
-    import re
     
     # STABILITY FIX: Mandatory staggered launch to avoid "Burst" blocking
     time.sleep(random.uniform(0.1, 0.5))
@@ -306,18 +336,24 @@ def translate_worker(text, translator_src, target_lang="en", engine="Google", de
             text = pattern.sub(target, text)
             
     last_err = ""
+    # SPRINT 31: Unicode Isolation Shield for Numbers (applied once outside retry loop)
+    text = re.sub(r'(\d[\-/]\d[\-/]?[0-9]*[\-/]?[0-9]*)', u' \u2066\\1\u2069 ', text)
+    
     # Try 3 times with exponential backoff
     for attempt in range(3):
         try:
-            # SPRINT 31: Unicode Isolation Shield for Numbers
-            text = re.sub(r'(\d[\-/]\d[\-/]?[0-9]*[\-/]?[0-9]*)', u' \u2066\\1\u2069 ', text)
-            
+            # SPRINT 116: Smart Fallback (Final attempt: Try "auto" detection)
+            current_src = translator_src
+            if attempt >= 1 and translator_src != "auto":
+                current_src = "auto"
+                worker_log(f"Attempt {attempt+1}: Falling back to Auto-Detect for stability.")
+
             translated = "[Translation Error]"
             if engine == "DeepL" and deepl_key:
                 import deepl
                 try:
                     translator = deepl.Translator(deepl_key)
-                    src = None if translator_src == 'auto' else translator_src.upper()
+                    src = None if current_src == 'auto' else current_src.upper()
                     
                     # SPRINT 84: Map target language for DeepL
                     deepl_tgt = target_lang.upper()
@@ -355,7 +391,7 @@ def translate_worker(text, translator_src, target_lang="en", engine="Google", de
                             if nxt: context_instr += f"- NEXT PAGE STARTING: \"{nxt[:500]}\"\n"
                     
                     prompt = (
-                        f"Translate these {len(paragraphs)} paragraphs from {translator_src} to {target_lang}. "
+                        f"Translate these {len(paragraphs)} paragraphs from {current_src} to {target_lang}. "
                         "Maintain the exact order and nuances. Use the provided glossary rules. "
                         "Return ONLY a JSON object with a key 'translations' containing an array of strings."
                     )
@@ -401,7 +437,7 @@ def translate_worker(text, translator_src, target_lang="en", engine="Google", de
                             if nxt: context_instr += f"- NEXT PAGE STARTING: \"{nxt[:500]}\"\n"
                     
                     prompt = (
-                        f"Translate exactly these {len(paragraphs)} paragraphs from {translator_src} to {target_lang}. "
+                        f"Translate exactly these {len(paragraphs)} paragraphs from {current_src} to {target_lang}. "
                         "DO NOT SUMMARIZE. DO NOT OMIT ANYTHING. Maintain the EXACT order, length, and nuances. "
                         f"Use the provided glossary rules. Return ONLY a JSON object with a key 'translations' containing exactly {len(paragraphs)} translated strings."
                     )
@@ -444,10 +480,11 @@ def translate_worker(text, translator_src, target_lang="en", engine="Google", de
                     raise Exception(f"Ollama Local Error: {oe}. Is Ollama running and '{model_name}' installed?")
                     
             else: # Default Google
-                if translator_src == "heb": translator_src = "iw"
+                final_src = current_src
+                if final_src == "heb": final_src = "iw"
                 
                 # SPRINT 82: Restore simple GoogleTranslator usage
-                translator = GoogleTranslator(source=translator_src, target=target_lang)
+                translator = GoogleTranslator(source=final_src, target=target_lang)
                 
                 # Split by double newlines to preserve paragraph structure
                 paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
@@ -460,8 +497,13 @@ def translate_worker(text, translator_src, target_lang="en", engine="Google", de
                     if i > 0:
                         time.sleep(random.uniform(0.5, 1.2)) # Basic jitter
                         
+                    if i == 0:
+                        worker_log(f"Mode: {final_src} -> {target_lang}. Text sample: {p[:100]}...")
+                        
                     res = translator.translate(p)
-                    if not res: raise Exception("Google returned empty result.")
+                    if not res: 
+                        worker_log("Google returned empty. Using original text as fallback.")
+                        res = p # Use original text
                     translated_paragraphs.append(res)
                 
                 translated = "\n\n".join(translated_paragraphs)
@@ -475,6 +517,7 @@ def translate_worker(text, translator_src, target_lang="en", engine="Google", de
             return {"translated": translated, "literal": literal}
         except Exception as e:
             last_err = humanize_error(e)
+            worker_log(f"Attempt {attempt+1} failed: {last_err}")
             wait_time = (2 ** attempt) + random.uniform(0.5, 1.5)
             time.sleep(wait_time)
             
